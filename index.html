@@ -15,6 +15,14 @@
             --border-color: #e2e8f0;
             --danger-color: #e74c3c;
             --success-color: #2ecc71;
+            
+            /* Farben für Listeneinträge */
+            --item-color-default: #2c3e50;
+            --item-color-red: #e74c3c;
+            --item-color-blue: #3498db;
+            --item-color-green: #2ecc71;
+            --item-color-orange: #f39c12;
+            --item-color-purple: #9b59b6;
         }
 
         * {
@@ -32,7 +40,7 @@
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -95,7 +103,7 @@
             color: var(--text-color);
         }
 
-        input[type="text"], input[type="date"], textarea {
+        input[type="text"], input[type="date"], textarea, select {
             width: 100%;
             padding: 10px;
             border: 1px solid var(--border-color);
@@ -128,6 +136,12 @@
             margin-bottom: 10px;
         }
         .btn-secondary:hover { background-color: #7f8c8d; }
+
+        .btn-print {
+            background-color: #27ae60;
+            margin-bottom: 10px;
+        }
+        .btn-print:hover { background-color: #2ecc71; }
 
         .list-selector-item {
             display: flex;
@@ -165,7 +179,7 @@
             padding: 5px;
             font-size: 12pt;
         }
-
+        .btn-delete-small:hover { color: var(--danger-color); }
         .list-selector-item.active .btn-delete-small { color: #fff; }
 
         .list-header-details {
@@ -189,14 +203,61 @@
             border: 1px solid var(--border-color);
         }
 
+        /* Hinzufügen-Formular */
         .add-item-form {
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 20px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
         }
 
-        .add-item-form input { flex-grow: 1; }
+        .add-item-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .add-item-form input[type="text"] { flex-grow: 1; }
+        .add-item-form select { width: 150px; }
+        
+        .color-selector {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .color-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        .color-btn.selected { border-color: #333; transform: scale(1.1); }
+
         .add-item-form button { width: auto; padding: 10px 20px; }
+
+        /* Kategorien-Ansicht */
+        .category-group {
+            margin-bottom: 20px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .category-header {
+            background-color: #f1f5f9;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 11pt;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--primary-color);
+        }
 
         .items-list { list-style: none; }
 
@@ -204,9 +265,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 12px;
+            padding: 10px 15px;
             border-bottom: 1px solid var(--border-color);
         }
+        .item-row:last-child { border-bottom: none; }
 
         .item-left {
             display: flex;
@@ -222,9 +284,14 @@
             cursor: pointer;
         }
 
+        .item-text {
+            font-size: 10.5pt;
+            font-weight: 500;
+        }
+
         .item-row.packed .item-text {
             text-decoration: line-through;
-            color: var(--text-muted);
+            opacity: 0.6;
         }
 
         .hinweise-textarea { resize: vertical; min-height: 80px; font-family: inherit; }
@@ -247,6 +314,48 @@
             border-radius: 10px;
             background: #fff;
         }
+
+        /* DRUCK-LAYOUT */
+        @media print {
+            body { 
+                background: white; 
+                padding: 0;
+            }
+            .sidebar, header, .add-item-form, .btn-delete-small { 
+                display: none !important; 
+            }
+            .main-layout {
+                display: block;
+            }
+            .content-area, .card {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                margin: 0;
+            }
+            .category-group {
+                border: 1px solid #ccc;
+                margin-bottom: 15px;
+                break-inside: avoid;
+            }
+            .category-header {
+                background-color: #eee !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .hinweise-textarea {
+                border: 1px solid #ccc;
+                background: #fff;
+            }
+            .item-row {
+                border-bottom: 1px solid #eee;
+            }
+            /* Farben im Druck erzwingen */
+            .item-text {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
     </style>
 </head>
 <body>
@@ -254,11 +363,11 @@
 <div class="container">
     <header>
         <h1>Packlisten-Manager</h1>
-        <p>Erstelle, verwalte und speichere deine Packlisten</p>
+        <p>Erstelle, kategorisiere und drucke deine Packlisten</p>
     </header>
 
     <div class="main-layout">
-        <!-- LINKER BEREICH: Sidebar & Erstellung -->
+        <!-- LINKER BEREICH: Sidebar -->
         <div class="sidebar">
             <div class="card">
                 <h2>Neue Liste anlegen</h2>
@@ -280,10 +389,9 @@
             </div>
 
             <div class="card">
-                <h2>Daten-Backup</h2>
-                <p style="font-size: 9pt; color: var(--text-muted); margin-bottom: 12px;">Speichere deine Listen auf dem Gerät, damit sie nie verloren gehen.</p>
+                <h2>Aktionen</h2>
+                <button type="button" class="btn-print" onclick="window.print()">🖨️ Aktuelle Liste drucken</button>
                 <button type="button" class="btn-secondary" onclick="exportData()">💾 Listen herunterladen</button>
-                
                 <label class="btn-upload" for="importFile">📂 Listen laden</label>
                 <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
             </div>
@@ -317,14 +425,37 @@
                 </div>
 
                 <div class="card">
-                    <h2>Gegenstände auf der Liste</h2>
+                    <h2>Gegenstände hinzufügen</h2>
                     
                     <form id="addItemForm" class="add-item-form">
-                        <input type="text" id="newItemName" placeholder="Neuen Gegenstand hinzufügen..." required>
-                        <button type="submit">Hinzufügen</button>
+                        <div class="add-item-row">
+                            <input type="text" id="newItemName" placeholder="Was möchtest du einpacken?" required>
+                            <select id="newItemCategory">
+                                <option value="Allgemein">Allgemein</option>
+                                <option value="Kleidung">Kleidung</option>
+                                <option value="Hygiene">Hygiene & Bad</option>
+                                <option value="Elektronik">Elektronik</option>
+                                <option value="Sportausrüstung">Sportausrüstung</option>
+                                <option value="Dokumente">Dokumente / Geld</option>
+                            </select>
+                        </div>
+                        <div class="add-item-row" style="justify-content: space-between; align-items: center; margin-top: 5px;">
+                            <div class="color-selector" id="colorSelector">
+                                <span style="font-size: 9pt; font-weight: bold; margin-right: 5px;">Farbe:</span>
+                                <div class="color-btn selected" style="background-color: var(--item-color-default);" data-color="var(--item-color-default)"></div>
+                                <div class="color-btn" style="background-color: var(--item-color-red);" data-color="var(--item-color-red)"></div>
+                                <div class="color-btn" style="background-color: var(--item-color-blue);" data-color="var(--item-color-blue)"></div>
+                                <div class="color-btn" style="background-color: var(--item-color-green);" data-color="var(--item-color-green)"></div>
+                                <div class="color-btn" style="background-color: var(--item-color-orange);" data-color="var(--item-color-orange)"></div>
+                                <div class="color-btn" style="background-color: var(--item-color-purple);" data-color="var(--item-color-purple)"></div>
+                            </div>
+                            <button type="submit">Hinzufügen</button>
+                        </div>
                     </form>
 
-                    <ul class="items-list" id="itemsListContainer"></ul>
+                    <div id="itemsListContainer">
+                    </div>
+                    
                     <div id="itemsEmptyState" class="empty-state" style="display: none;">
                         Noch keine Gegenstände auf dieser Liste.
                     </div>
@@ -335,8 +466,9 @@
 </div>
 
 <script>
-    let packlisten = JSON.parse(localStorage.getItem('packlisten_data')) || [];
+    let packlisten = JSON.parse(localStorage.getItem('packlisten_v2')) || [];
     let activeListId = null;
+    let selectedColor = 'var(--item-color-default)';
 
     const newListForm = document.getElementById('newListForm');
     const savedListsContainer = document.getElementById('savedListsContainer');
@@ -350,8 +482,18 @@
     
     const addItemForm = document.getElementById('addItemForm');
     const newItemName = document.getElementById('newItemName');
+    const newItemCategory = document.getElementById('newItemCategory');
     const itemsListContainer = document.getElementById('itemsListContainer');
     const itemsEmptyState = document.getElementById('itemsEmptyState');
+    const colorBtns = document.querySelectorAll('.color-btn');
+
+    colorBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            colorBtns.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedColor = btn.getAttribute('data-color');
+        });
+    });
 
     function init() {
         renderSidebar();
@@ -363,7 +505,7 @@
     }
 
     function saveData() {
-        localStorage.setItem('packlisten_data', JSON.stringify(packlisten));
+        localStorage.setItem('packlisten_v2', JSON.stringify(packlisten));
     }
 
     function formatDate(dateStr) {
@@ -384,7 +526,6 @@
             const div = document.createElement('div');
             div.className = `list-selector-item ${list.id === activeListId ? 'active' : ''}`;
             
-            // Wichtig für Touch-Geräte:
             div.addEventListener('click', (e) => {
                 if (e.target.closest('.btn-delete-small')) return;
                 selectList(list.id);
@@ -425,7 +566,7 @@
         activeNotes.value = list.notes || '';
 
         renderItems(list);
-        renderSidebar(); // Aktualisiert die Markierung links
+        renderSidebar();
     }
 
     function showEmptyState() {
@@ -443,31 +584,58 @@
         }
         itemsEmptyState.style.display = 'none';
 
+        const categorizedItems = {};
         list.items.forEach(item => {
-            const li = document.createElement('li');
-            li.className = `item-row ${item.packed ? 'packed' : ''}`;
-            
-            li.innerHTML = `
-                <div class="item-left">
-                    <input type="checkbox" ${item.packed ? 'checked' : ''}>
-                    <span class="item-text">${escapeHTML(item.name)}</span>
-                </div>
-                <button type="button" class="btn-delete-small" title="Gegenstand entfernen">✕</button>
-            `;
+            const cat = item.category || 'Allgemein';
+            if (!categorizedItems[cat]) categorizedItems[cat] = [];
+            categorizedItems[cat].push(item);
+        });
 
-            const checkbox = li.querySelector('input[type="checkbox"]');
-            checkbox.addEventListener('change', () => toggleItemPacked(list.id, item.id));
+        const sortedCategories = Object.keys(categorizedItems).sort();
+
+        sortedCategories.forEach(category => {
+            const catGroup = document.createElement('div');
+            catGroup.className = 'category-group';
             
-            li.querySelector('.item-left').addEventListener('click', (e) => {
-                if (e.target !== checkbox) {
-                    checkbox.checked = !checkbox.checked;
-                    toggleItemPacked(list.id, item.id);
-                }
+            const catHeader = document.createElement('div');
+            catHeader.className = 'category-header';
+            catHeader.textContent = category;
+            catGroup.appendChild(catHeader);
+
+            const ul = document.createElement('ul');
+            ul.className = 'items-list';
+
+            categorizedItems[category].forEach(item => {
+                const li = document.createElement('li');
+                li.className = `item-row ${item.packed ? 'packed' : ''}`;
+                
+                const textColor = item.color || 'var(--item-color-default)';
+
+                li.innerHTML = `
+                    <div class="item-left">
+                        <input type="checkbox" ${item.packed ? 'checked' : ''}>
+                        <span class="item-text" style="color: ${textColor}">${escapeHTML(item.name)}</span>
+                    </div>
+                    <button type="button" class="btn-delete-small" title="Gegenstand entfernen">✕</button>
+                `;
+
+                const checkbox = li.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', () => toggleItemPacked(list.id, item.id));
+                
+                li.querySelector('.item-left').addEventListener('click', (e) => {
+                    if (e.target !== checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        toggleItemPacked(list.id, item.id);
+                    }
+                });
+
+                li.querySelector('.btn-delete-small').addEventListener('click', () => deleteItem(list.id, item.id));
+
+                ul.appendChild(li);
             });
 
-            li.querySelector('.btn-delete-small').addEventListener('click', () => deleteItem(list.id, item.id));
-
-            itemsListContainer.appendChild(li);
+            catGroup.appendChild(ul);
+            itemsListContainer.appendChild(catGroup);
         });
     }
 
@@ -514,12 +682,15 @@
             const newItem = {
                 id: 'item-' + Date.now(),
                 name: newItemName.value,
+                category: newItemCategory.value,
+                color: selectedColor,
                 packed: false
             };
             if (!list.items) list.items = [];
             list.items.push(newItem);
             saveData();
             newItemName.value = '';
+            colorBtns[0].click(); 
             renderItems(list);
         }
     });
@@ -554,7 +725,6 @@
         }
     });
 
-    // --- NEUE EXPORT / IMPORT FUNKTIONEN ---
     function exportData() {
         if (packlisten.length === 0) {
             alert('Du hast noch keine Listen erstellt, die du speichern könntest.');
@@ -562,7 +732,7 @@
         }
         const dataStr = JSON.stringify(packlisten);
         const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-        const exportFileDefaultName = 'meine_packlisten.json';
+        const exportFileDefaultName = 'meine_packlisten_v2.json';
 
         const linkElement = document.createElement('a');
         linkElement.setAttribute('href', dataUri);
@@ -581,6 +751,15 @@
             try {
                 const importedData = JSON.parse(e.target.result);
                 if (Array.isArray(importedData)) {
+                    importedData.forEach(list => {
+                        if (list.items) {
+                            list.items.forEach(item => {
+                                if (!item.category) item.category = 'Allgemein';
+                                if (!item.color) item.color = 'var(--item-color-default)';
+                            });
+                        }
+                    });
+                    
                     packlisten = importedData;
                     saveData();
                     init();
@@ -593,7 +772,7 @@
             }
         };
         reader.readAsText(file);
-        event.target.value = ''; // Reset Input
+        event.target.value = ''; 
     }
 
     function escapeHTML(str) {
