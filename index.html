@@ -6,296 +6,283 @@
     <title>Liquid Glass Packlisten-Manager</title>
     <style>
         :root {
+            /* Standard Light Mode (Liquid Glass) */
             --glass-bg: rgba(255, 255, 255, 0.45);
             --glass-border: rgba(255, 255, 255, 0.6);
             --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+            --nav-bg: rgba(255, 255, 255, 0.65);
+            --nav-item-active: rgba(0, 0, 0, 0.1);
+            --nav-item-color: #515154;
+            --nav-item-active-color: #0071e3;
             --text-color: #1d1d1f;
             --text-muted: #515154;
             --primary-color: #0071e3;
             --danger-color: #ff3b30;
             --success-color: #34c759;
+            --input-bg: rgba(255, 255, 255, 0.5);
+            --item-row-border: rgba(0, 0, 0, 0.05);
             --border-radius: 18px;
+        }
+
+        /* Dark Mode Override */
+        body.dark-mode {
+            --glass-bg: rgba(30, 30, 32, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --nav-bg: rgba(30, 30, 32, 0.75);
+            --nav-item-active: rgba(255, 255, 255, 0.15);
+            --nav-item-color: #a0a0a5;
+            --nav-item-active-color: #ffffff;
+            --text-color: #ffffff;
+            --text-muted: #a0a0a5;
+            --primary-color: #0a84ff;
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --item-row-border: rgba(255, 255, 255, 0.08);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        @keyframes liquidBg {
+        @keyframes bgShift {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
+        /* --- DIE 10 HINTERGRUND-ANIMATIONEN --- */
+        .bg-1 { background: linear-gradient(270deg, #0071e3, #8e8e93, #ffffff, #d1d1d6); } /* Blau Grau Weiß */
+        .bg-2 { background: linear-gradient(270deg, #ff9a9e, #fecfef, #f6d365, #fda085); } /* Apple Mesh Pink */
+        .bg-3 { background: linear-gradient(270deg, #13547a, #80d0c7, #13547a); } /* Ocean */
+        .bg-4 { background: linear-gradient(270deg, #fa709a, #fee140, #ff9a44); } /* Sunset */
+        .bg-5 { background: linear-gradient(270deg, #0f2027, #203a43, #2c5364); } /* Midnight */
+        .bg-6 { background: linear-gradient(270deg, #43e97b, #38f9d7, #43e97b); } /* Aurora */
+        .bg-7 { background: linear-gradient(270deg, #a18cd1, #fbc2eb, #8fd3f4); } /* Candy */
+        .bg-8 { background: linear-gradient(270deg, #ff0844, #ffb199, #ff0844); } /* Lava */
+        .bg-9 { background: linear-gradient(270deg, #30cfd0, #330867, #30cfd0); } /* Cyberpunk */
+        .bg-10 { background: linear-gradient(270deg, #000000, #434343, #000000); } /* Dark Mono */
+
         body {
-            background: linear-gradient(270deg, #0071e3, #8e8e93, #ffffff, #d1d1d6);
-            background-size: 600% 600%;
-            animation: liquidBg 15s ease infinite;
+            background-size: 400% 400%;
+            animation: bgShift 15s ease infinite;
             color: var(--text-color);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
             line-height: 1.6;
             min-height: 100dvh;
             overflow-x: hidden;
-            padding-bottom: calc(80px + env(safe-area-inset-bottom)); /* Platz für Bottom Nav */
+            padding-bottom: calc(100px + env(safe-area-inset-bottom)); /* Platz für Bottom Nav */
             -webkit-font-smoothing: antialiased;
+            transition: color 0.3s ease;
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
-            padding-top: 85px; 
+            padding-top: calc(85px + env(safe-area-inset-top)); 
             padding-left: calc(20px + env(safe-area-inset-left));
             padding-right: calc(20px + env(safe-area-inset-right));
         }
 
-        /* --- HEADER FIX --- */
+        /* --- HEADER --- */
         header {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+            top: 0; left: 0; width: 100%;
             height: calc(60px + env(safe-area-inset-top));
             padding-top: env(safe-area-inset-top);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.3);
+            display: flex; align-items: center; justify-content: center;
+            background: var(--glass-bg);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border-bottom: 1px solid var(--glass-border);
             z-index: 999;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         header h1 {
-            font-size: 15pt;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-            padding: 0 20px;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
+            font-size: 15pt; font-weight: 600; letter-spacing: -0.5px;
         }
 
-        .main-layout {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 25px;
-            width: 100%;
+        /* --- TAB LOGIK --- */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
         }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .sidebar { display: flex; flex-direction: column; gap: 20px; }
-
+        /* --- CARDS & FORMS --- */
         .card {
             background: var(--glass-bg);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
             border: 1px solid var(--glass-border);
             border-radius: var(--border-radius);
-            padding: 22px;
+            padding: 25px;
             box-shadow: var(--glass-shadow);
+            margin-bottom: 25px;
+            transition: background 0.3s, border-color 0.3s;
         }
 
         .card h2 {
-            font-size: 13pt;
-            margin-bottom: 15px;
-            font-weight: 600;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            padding-bottom: 8px;
+            font-size: 14pt; margin-bottom: 15px; font-weight: 600;
+            border-bottom: 1px solid var(--item-row-border); padding-bottom: 8px;
         }
 
-        .form-group { margin-bottom: 12px; }
+        .form-group { margin-bottom: 15px; }
 
         label {
-            display: block;
-            font-size: 8.5pt;
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: var(--text-muted);
-            text-transform: uppercase;
+            display: block; font-size: 8.5pt; font-weight: 600; margin-bottom: 5px;
+            color: var(--text-muted); text-transform: uppercase;
         }
 
         input[type="text"], input[type="date"], textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            font-size: 16px !important; 
-            background: rgba(255, 255, 255, 0.5);
-            color: var(--text-color);
-            transition: all 0.2s ease;
-            font-family: inherit;
-            -webkit-appearance: none;
+            width: 100%; padding: 14px;
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            font-size: 16px !important; /* Wichtig gegen iPhone Auto-Zoom */
+            background: var(--input-bg); color: var(--text-color);
+            transition: all 0.2s ease; font-family: inherit; -webkit-appearance: none;
         }
 
         input:focus, textarea:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.8);
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2);
+            outline: none; background: var(--glass-bg);
+            border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2);
         }
 
         button, .btn-upload {
-            width: 100%;
-            padding: 14px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-block;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.2);
-            -webkit-tap-highlight-color: transparent;
+            width: 100%; padding: 14px; background: var(--primary-color);
+            color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; display: inline-block; text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.2); -webkit-tap-highlight-color: transparent;
         }
-
         button:active, .btn-upload:active { transform: scale(0.97); }
 
-        .btn-secondary { background: rgba(255, 255, 255, 0.6); color: var(--text-color); box-shadow: none; border: 1px solid var(--glass-border); }
+        .btn-secondary { background: var(--input-bg); color: var(--text-color); box-shadow: none; border: 1px solid var(--glass-border); }
         .btn-print { background: var(--success-color); box-shadow: 0 4px 12px rgba(52, 199, 89, 0.2); margin-top: 15px; }
 
+        /* --- LISTEN-VERWALTUNG (TAB 2) --- */
         .list-selector-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.4);
-            border: 1px solid transparent;
-            transition: all 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px; border-radius: 14px; margin-bottom: 10px; cursor: pointer;
+            background: var(--input-bg); border: 1px solid var(--glass-border); transition: all 0.2s;
         }
-        .list-selector-item.active { background: var(--primary-color); color: white; box-shadow: 0 4px 12px rgba(0, 113, 227, 0.2); }
+        .list-selector-item:hover { background: var(--glass-bg); }
+        .list-selector-item.is-active-list {
+            background: var(--primary-color); color: white; border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+        }
         .list-selector-item .title { font-weight: 600; font-size: 16px; }
-        .list-selector-item .meta { font-size: 12px; opacity: 0.7; margin-top: 2px; }
-        .list-selector-item.active .meta { color: rgba(255,255,255,0.8); }
+        .list-selector-item .meta { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+        .list-selector-item.is-active-list .meta { color: rgba(255,255,255,0.8); }
 
         .btn-delete-small {
             background: none; border: none; color: var(--text-muted); cursor: pointer;
-            width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14pt; box-shadow: none; padding: 0;
+            width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14pt; box-shadow: none; padding: 0;
         }
-        .btn-delete-small:hover { color: var(--danger-color); background: rgba(255,255,255,0.3); }
-        .list-selector-item.active .btn-delete-small { color: white; }
+        .btn-delete-small:hover { color: var(--danger-color); background: var(--glass-bg); }
+        .list-selector-item.is-active-list .btn-delete-small { color: white; }
 
-        .list-header-details { margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.06); }
-        .list-tags { display: flex; gap: 8px; margin-top: 8px; font-size: 9pt; }
-        .tag-block { background: rgba(255, 255, 255, 0.5); padding: 4px 10px; border-radius: 8px; font-weight: 500; }
+        /* --- AKTUELLE LISTE (TAB 3) --- */
+        .list-header-details { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--item-row-border); }
+        .list-tags { display: flex; gap: 8px; margin-top: 8px; font-size: 10pt; }
+        .tag-block { background: var(--input-bg); padding: 4px 10px; border-radius: 8px; font-weight: 500; border: 1px solid var(--glass-border); }
 
         .add-item-form { display: flex; gap: 10px; margin-bottom: 25px; }
         .add-item-form input { flex-grow: 1; }
-        .add-item-form button { width: auto; padding: 0 20px; }
+        .add-item-form button { width: auto; padding: 0 24px; }
 
         .items-list { list-style: none; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 6px; border-bottom: 1px solid rgba(0,0,0,0.04); }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 6px; border-bottom: 1px solid var(--item-row-border); }
         .item-row:last-child { border-bottom: none; }
         .item-left { display: flex; align-items: center; gap: 15px; flex-grow: 1; cursor: pointer; }
 
         /* iOS Toggle Switch */
         .item-row input[type="checkbox"] {
             appearance: none; -webkit-appearance: none; width: 50px; height: 30px;
-            background: rgba(255, 255, 255, 0.5); border: 1px solid var(--glass-border); border-radius: 15px;
-            position: relative; cursor: pointer; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-            transition: background 0.3s ease, border-color 0.3s ease; flex-shrink: 0;
+            background: var(--input-bg); border: 1px solid var(--glass-border); border-radius: 15px;
+            position: relative; cursor: pointer; outline: none; transition: all 0.3s ease; flex-shrink: 0;
         }
         .item-row input[type="checkbox"]::after {
             content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px;
-            background: white; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: white; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .item-row input[type="checkbox"]:checked { background: var(--success-color); border-color: var(--success-color); }
         .item-row input[type="checkbox"]:checked::after { transform: translateX(20px); }
 
         .item-text { font-size: 16px; font-weight: 500; transition: all 0.2s; }
-        .item-row.packed .item-text { text-decoration: line-through; opacity: 0.5; }
-        .hinweise-textarea { resize: vertical; min-height: 80px; }
-        .empty-state, .no-selection-notice { text-align: center; padding: 30px; color: var(--text-muted); font-weight: 500; }
+        .item-row.packed .item-text { text-decoration: line-through; opacity: 0.4; }
+        .hinweise-textarea { resize: vertical; min-height: 100px; }
+        
+        .empty-state { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 500; background: var(--input-bg); border-radius: 14px; border: 2px dashed var(--glass-border); }
 
-        /* --- FLOATING BOTTOM NAVIGATION BAR (Vom Bild übernommen) --- */
+        /* --- DESIGN KONFIGURATOR (TAB 5) --- */
+        .design-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .bg-preview-btn {
+            width: 100%; aspect-ratio: 1; border-radius: 50%; border: 3px solid var(--glass-border);
+            cursor: pointer; transition: transform 0.2s; padding: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .bg-preview-btn:hover { transform: scale(1.1); }
+        .bg-preview-btn.active { border-color: var(--text-color); transform: scale(1.1); box-shadow: 0 0 0 2px var(--text-color); }
+
+        /* --- FLOATING BOTTOM NAVIGATION BAR (Desktop & Mobile) --- */
         .bottom-nav {
-            display: none; /* Auf großen Bildschirmen versteckt */
             position: fixed;
             bottom: max(20px, env(safe-area-inset-bottom));
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(30, 30, 32, 0.85); /* Dunkles Pill-Design */
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            background: var(--nav-bg);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
             border-radius: 40px;
             padding: 8px;
+            display: flex;
             gap: 5px;
             z-index: 1000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            border: 1px solid var(--glass-border);
+            transition: background 0.3s;
+            width: max-content;
+            max-width: 95vw;
         }
 
         .nav-item {
             background: transparent;
             border: none;
             border-radius: 30px;
-            padding: 12px 24px;
-            color: #a0a0a5;
+            padding: 12px 20px;
+            color: var(--nav-item-color);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
             box-shadow: none;
-            width: auto;
+            flex-direction: column;
+            gap: 3px;
         }
-
+        .nav-item span { font-size: 10px; font-weight: 600; display: block; }
         .nav-item svg { width: 24px; height: 24px; fill: currentColor; }
 
         .nav-item.active {
-            background: rgba(255, 255, 255, 0.15); /* Heller Hintergrund für aktiven Tab */
-            color: #ffffff;
+            background: var(--nav-item-active);
+            color: var(--nav-item-active-color);
         }
 
-        /* --- MOBILE LAYOUT & TAB LOGIC --- */
-        .mobile-section { display: block; }
-
-        @media (max-width: 900px) {
-            .main-layout { grid-template-columns: 1fr; }
-            .bottom-nav { display: flex; } /* Bottom Nav auf Mobile aktivieren */
-            
-            /* Sidebar ist jetzt kein Slider mehr, sondern Tab 1 */
-            .sidebar {
-                display: none; /* Standardmäßig aus */
-                width: 100%;
-                background: transparent;
-                box-shadow: none;
-                backdrop-filter: none;
-                -webkit-backdrop-filter: none;
-                position: relative;
-                height: auto;
-                padding: 0;
-            }
-
-            .content-area {
-                display: none; /* Standardmäßig aus */
-            }
-
-            /* Backup-Karte aus der Sidebar in eigenen Tab separieren */
-            #backupCard { display: none; }
-            
-            /* Aktivitäts-Klassen für Mobile Views */
-            .show-lists #sidebar { display: flex; }
-            .show-lists #backupCard { display: none; }
-            
-            .show-active #activeListWrapper { display: block; }
-            
-            .show-settings #backupCard { display: block; }
+        /* Mobile Anpassung Nav */
+        @media (max-width: 600px) {
+            .nav-item { padding: 10px 14px; }
+            .nav-item span { display: none; } /* Text auf kleinen Handys ausblenden für Platz */
         }
 
         @media print {
-            body { background: white !important; background-image: none !important; color: black !important; animation: none !important; }
-            header, .sidebar, .bottom-nav, .add-item-form, .btn-delete-small, .btn-print, #backupCard { display: none !important; }
+            body { background: white !important; color: black !important; animation: none !important; }
+            header, .bottom-nav, .add-item-form, .btn-delete-small, .btn-print, #view-new, #view-lists, #view-backup, #view-design { display: none !important; }
             .container { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
-            .main-layout { display: block !important; }
-            .card { background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
+            .view-section { display: block !important; }
+            .card { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
             .item-row { border-bottom: 1px solid #ddd !important; }
             .item-row input[type="checkbox"] { width: 20px !important; height: 20px !important; border: 1px solid #000 !important; border-radius: 4px !important; }
             .item-row input[type="checkbox"]::after { display: none !important; }
@@ -303,109 +290,174 @@
         }
     </style>
 </head>
-<body class="show-lists"> <!-- Startet auf Mobile mit Tab "Listen" -->
+<!-- Initial Background Klasse -->
+<body class="bg-1"> 
 
 <header>
     <h1>Packlisten-Manager</h1>
 </header>
 
-<!-- FLOATING BOTTOM NAV BAR (Dark Pill Style) -->
-<nav class="bottom-nav">
-    <button class="nav-item active" id="tab-lists" onclick="switchTab('lists')" title="Meine Listen">
-        <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
-    </button>
-    <button class="nav-item" id="tab-active" onclick="switchTab('active')" title="Aktuelle Liste">
-        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-    </button>
-    <button class="nav-item" id="tab-settings" onclick="switchTab('settings')" title="Einstellungen & Backup">
-        <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
-    </button>
-</nav>
-
 <div class="container">
-    <div class="main-layout">
-        
-        <!-- SIDEBAR (Tab 1) -->
-        <div class="sidebar" id="sidebar">
-            <div class="card">
-                <h2>Neue Liste anlegen</h2>
-                <form id="newListForm">
-                    <div class="form-group">
-                        <label for="listName">Reise / Event</label>
-                        <input type="text" id="listName" placeholder="z. B. Kroatien" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="listDate">Datum</label>
-                        <input type="date" id="listDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="listPurpose">Kategorie</label>
-                        <input type="text" id="listPurpose" placeholder="z. B. Sommerurlaub" required>
-                    </div>
-                    <button type="submit">Liste erstellen</button>
-                </form>
-            </div>
-
-            <div class="card">
-                <h2>Deine Listen</h2>
-                <div id="savedListsContainer"></div>
-            </div>
-            
-            <!-- BACKUP KARTEN (Desktop: Sidebar, Mobile: Eigener Tab 3) -->
-            <div class="card" id="backupCard">
-                <h2>Backup & Einstellungen</h2>
-                <button type="button" class="btn-secondary" onclick="exportData()" style="margin-bottom: 10px;">💾 Backup Herunterladen</button>
-                <label class="btn-upload btn-secondary" for="importFile">📂 Backup Laden</label>
-                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
-            </div>
+    
+    <!-- SLOT 1: NEUE LISTE -->
+    <div id="view-new" class="view-section">
+        <div class="card">
+            <h2>Neue Packliste anlegen</h2>
+            <form id="newListForm">
+                <div class="form-group">
+                    <label for="listName">Reise / Event</label>
+                    <input type="text" id="listName" placeholder="z. B. Kroatien, Klassenfahrt" required>
+                </div>
+                <div class="form-group">
+                    <label for="listDate">Datum</label>
+                    <input type="date" id="listDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="listPurpose">Kategorie</label>
+                    <input type="text" id="listPurpose" placeholder="z. B. Strandurlaub, Sportcamp" required>
+                </div>
+                <button type="submit" style="margin-top: 10px;">Liste erstellen & öffnen</button>
+            </form>
         </div>
+    </div>
 
-        <!-- HAUPTINHALT (Tab 2) -->
-        <div class="content-area" id="activeListWrapper">
-            <div class="card no-selection-notice" id="noSelectionNotice">
-                Wähle unten im Menü 📝 aus und öffne eine Packliste.
+    <!-- SLOT 2: LISTEN VERWALTEN -->
+    <div id="view-lists" class="view-section">
+        <div class="card">
+            <h2>Deine Listen</h2>
+            <div id="savedListsContainer"></div>
+        </div>
+    </div>
+
+    <!-- SLOT 3: AKTUELLE LISTE BEARBEITEN -->
+    <div id="view-active" class="view-section">
+        <div id="noSelectionNotice" class="empty-state">
+            Wähle im Menü "Listen" eine Packliste aus oder erstelle eine "Neu".
+        </div>
+        
+        <div id="activeListContent" style="display: none;">
+            <div class="card">
+                <div class="list-header-details">
+                    <h2 id="activeTitle" style="border: none; margin-bottom: 5px; font-size: 22pt;">-</h2>
+                    <div class="list-tags">
+                        <div class="tag-block">Datum: <strong id="activeDate">-</strong></div>
+                        <div class="tag-block">Zweck: <strong id="activePurpose">-</strong></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="activeNotes">Notizen & wichtige Infos</label>
+                    <textarea id="activeNotes" class="hinweise-textarea" placeholder="Hier Notizen eintragen..."></textarea>
+                </div>
             </div>
-            
-            <div id="activeListContent" style="display: none;">
-                <div class="card">
-                    <div class="list-header-details">
-                        <h2 id="activeTitle" style="border: none; margin-bottom: 5px; font-size: 20pt;">-</h2>
-                        <div class="list-tags">
-                            <div class="tag-block">Datum: <strong id="activeDate">-</strong></div>
-                            <div class="tag-block">Zweck: <strong id="activePurpose">-</strong></div>
-                        </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="activeNotes">Notizen & wichtige Infos</label>
-                        <textarea id="activeNotes" class="hinweise-textarea" placeholder="Hier Notizen eintragen..."></textarea>
-                    </div>
+            <div class="card">
+                <h2>Was muss eingepackt werden?</h2>
+                
+                <form id="addItemForm" class="add-item-form">
+                    <input type="text" id="newItemName" placeholder="Neuer Gegenstand..." required>
+                    <button type="submit">Hinzufügen</button>
+                </form>
+
+                <ul class="items-list" id="itemsListContainer"></ul>
+                <div id="itemsEmptyState" class="empty-state" style="display: none; padding: 20px;">
+                    Die Liste ist noch leer.
                 </div>
 
-                <div class="card">
-                    <h2>Gegenstände</h2>
-                    
-                    <form id="addItemForm" class="add-item-form">
-                        <input type="text" id="newItemName" placeholder="Was muss mit?" required>
-                        <button type="submit">Add</button>
-                    </form>
-
-                    <ul class="items-list" id="itemsListContainer"></ul>
-                    <div id="itemsEmptyState" class="empty-state" style="display: none;">
-                        Die Liste ist noch leer.
-                    </div>
-
-                    <button class="btn-print" onclick="window.print()">🖨️ Liste drucken</button>
-                </div>
+                <button class="btn-print" onclick="window.print()">🖨️ Liste drucken</button>
             </div>
         </div>
     </div>
+
+    <!-- SLOT 4: BACKUP -->
+    <div id="view-backup" class="view-section">
+        <div class="card">
+            <h2>Daten-Sicherung</h2>
+            <p style="margin-bottom: 20px; font-size: 11pt; color: var(--text-muted);">Speichere deine Packlisten auf dem Gerät oder übertrage sie auf ein anderes Gerät.</p>
+            <button type="button" class="btn-secondary" onclick="exportData()" style="margin-bottom: 15px;">💾 Backup Herunterladen</button>
+            <label class="btn-upload btn-secondary" for="importFile">📂 Backup Laden</label>
+            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+        </div>
+    </div>
+
+    <!-- SLOT 5: DESIGN & THEMES -->
+    <div id="view-design" class="view-section">
+        <div class="card">
+            <h2>Erscheinungsbild</h2>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; padding: 15px; background: var(--input-bg); border-radius: 12px; border: 1px solid var(--glass-border);">
+                <strong style="font-size: 12pt;">Dark Mode</strong>
+                <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()" style="
+                    appearance: none; width: 50px; height: 30px; background: rgba(0,0,0,0.2); border-radius: 15px;
+                    position: relative; cursor: pointer; outline: none; transition: 0.3s;
+                ">
+                <style>
+                    #darkModeToggle::after {
+                        content: ''; position: absolute; top: 2px; left: 2px; width: 26px; height: 26px;
+                        background: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                    }
+                    #darkModeToggle:checked { background: var(--success-color); }
+                    #darkModeToggle:checked::after { transform: translateX(20px); }
+                </style>
+            </div>
+
+            <h3 style="font-size: 11pt; margin-bottom: 10px; color: var(--text-muted); text-transform: uppercase;">Fließende Hintergründe</h3>
+            <div class="design-grid">
+                <!-- Die 10 Buttons generieren den jeweiligen bg-Style -->
+                <button class="bg-preview-btn bg-1 active" onclick="setTheme(1)" title="Classic Blue"></button>
+                <button class="bg-preview-btn bg-2" onclick="setTheme(2)" title="Apple Mesh"></button>
+                <button class="bg-preview-btn bg-3" onclick="setTheme(3)" title="Ocean Waves"></button>
+                <button class="bg-preview-btn bg-4" onclick="setTheme(4)" title="Sunset"></button>
+                <button class="bg-preview-btn bg-5" onclick="setTheme(5)" title="Midnight"></button>
+                <button class="bg-preview-btn bg-6" onclick="setTheme(6)" title="Aurora"></button>
+                <button class="bg-preview-btn bg-7" onclick="setTheme(7)" title="Cotton Candy"></button>
+                <button class="bg-preview-btn bg-8" onclick="setTheme(8)" title="Lava"></button>
+                <button class="bg-preview-btn bg-9" onclick="setTheme(9)" title="Cyberpunk"></button>
+                <button class="bg-preview-btn bg-10" onclick="setTheme(10)" title="Dark Mono"></button>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+<!-- BOTTOM NAV (Apple Liquid Glass) -->
+<nav class="bottom-nav">
+    <!-- Slot 1: Neu -->
+    <button class="nav-item" id="tab-new" onclick="switchTab('new')" title="Neu">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        <span>Neu</span>
+    </button>
+    <!-- Slot 2: Listen -->
+    <button class="nav-item" id="tab-lists" onclick="switchTab('lists')" title="Listen">
+        <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+        <span>Listen</span>
+    </button>
+    <!-- Slot 3: Aktuell -->
+    <button class="nav-item active" id="tab-active" onclick="switchTab('active')" title="Aktuell">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        <span>Aktuell</span>
+    </button>
+    <!-- Slot 4: Backup -->
+    <button class="nav-item" id="tab-backup" onclick="switchTab('backup')" title="Backup">
+        <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+        <span>Backup</span>
+    </button>
+    <!-- Slot 5: Design -->
+    <button class="nav-item" id="tab-design" onclick="switchTab('design')" title="Design">
+        <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+        <span>Design</span>
+    </button>
+</nav>
 
 <script>
     let packlisten = JSON.parse(localStorage.getItem('packlisten_data')) || [];
     let activeListId = null;
 
+    // Einstellungen laden
+    let currentTheme = localStorage.getItem('bg_theme') || '1';
+    let isDarkMode = localStorage.getItem('dark_mode') === 'true';
+
+    // DOM Elemente
     const newListForm = document.getElementById('newListForm');
     const savedListsContainer = document.getElementById('savedListsContainer');
     const activeListContent = document.getElementById('activeListContent');
@@ -421,31 +473,60 @@
     const itemsListContainer = document.getElementById('itemsListContainer');
     const itemsEmptyState = document.getElementById('itemsEmptyState');
 
-    // Bottom Navigation Logic
+    // TAB LOGIK
     function switchTab(tabName) {
-        // Body Klasse ändern für CSS Logic
-        document.body.className = '';
-        document.body.classList.add('show-' + tabName);
-        
-        // Buttons umfärben
+        // Alle Views ausblenden
+        document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+        // Alle Buttons deaktivieren
         document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+        
+        // Aktiven View & Button zeigen
+        document.getElementById('view-' + tabName).classList.add('active');
         document.getElementById('tab-' + tabName).classList.add('active');
         
-        // Nach oben scrollen bei Tabwechsel
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function init() {
-        renderSidebar();
+        applyDesignSettings();
+        
         if (packlisten.length > 0) {
-            selectList(packlisten[0].id);
-            // Wenn Listen existieren, wechsle auf Mobile direkt zur aktiven Ansicht
-            if (window.innerWidth <= 900) switchTab('active');
+            selectList(packlisten[0].id, false); 
+            switchTab('active'); // Start im "Aktuell" Tab wenn Listen da sind
         } else {
+            switchTab('new'); // Start im "Neu" Tab wenn leer
             showEmptyState();
         }
     }
 
+    // DESIGN & THEMES LOGIK
+    function applyDesignSettings() {
+        // BG setzen
+        document.body.className = `bg-${currentTheme}`;
+        if (isDarkMode) document.body.classList.add('dark-mode');
+        
+        // Toggle UI updaten
+        document.getElementById('darkModeToggle').checked = isDarkMode;
+        
+        // Aktiven Button im Grid markieren
+        document.querySelectorAll('.bg-preview-btn').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.querySelector(`.bg-preview-btn.bg-${currentTheme}`);
+        if(activeBtn) activeBtn.classList.add('active');
+    }
+
+    function setTheme(themeNumber) {
+        currentTheme = themeNumber;
+        localStorage.setItem('bg_theme', themeNumber);
+        applyDesignSettings();
+    }
+
+    function toggleDarkMode() {
+        isDarkMode = document.getElementById('darkModeToggle').checked;
+        localStorage.setItem('dark_mode', isDarkMode);
+        applyDesignSettings();
+    }
+
+    // DATEN LOGIK
     function saveData() {
         localStorage.setItem('packlisten_data', JSON.stringify(packlisten));
     }
@@ -457,22 +538,20 @@
         return `${parts[2]}.${parts[1]}.${parts[0]}`;
     }
 
-    function renderSidebar() {
+    function renderLists() {
         savedListsContainer.innerHTML = '';
         if (packlisten.length === 0) {
-            savedListsContainer.innerHTML = '<div class="empty-state" style="padding: 15px;">Keine Listen vorhanden.</div>';
+            savedListsContainer.innerHTML = '<div class="empty-state">Keine Listen vorhanden. Erstelle eine Neue!</div>';
             return;
         }
 
         packlisten.forEach(list => {
             const div = document.createElement('div');
-            div.className = `list-selector-item ${list.id === activeListId ? 'active' : ''}`;
+            div.className = `list-selector-item ${list.id === activeListId ? 'is-active-list' : ''}`;
             
             div.addEventListener('click', (e) => {
                 if (e.target.closest('.btn-delete-small')) return;
-                selectList(list.id);
-                // Auf Mobile: Nach Auswahl automatisch zum "Aktuell" Tab wechseln
-                if (window.innerWidth <= 900) switchTab('active');
+                selectList(list.id, true);
             });
 
             div.innerHTML = `
@@ -480,7 +559,7 @@
                     <div class="title">${escapeHTML(list.name)}</div>
                     <div class="meta">${formatDate(list.date)} | ${escapeHTML(list.purpose)}</div>
                 </div>
-                <button type="button" class="btn-delete-small" title="Liste löschen">✕</button>
+                <button type="button" class="btn-delete-small" title="Löschen">✕</button>
             `;
 
             div.querySelector('.btn-delete-small').addEventListener('click', (e) => {
@@ -492,7 +571,7 @@
         });
     }
 
-    function selectList(id) {
+    function selectList(id, autoSwitchTab = false) {
         activeListId = id;
         const list = packlisten.find(l => l.id === id);
         
@@ -510,14 +589,16 @@
         activeNotes.value = list.notes || '';
 
         renderItems(list);
-        renderSidebar(); 
+        renderLists(); 
+        
+        if(autoSwitchTab) switchTab('active');
     }
 
     function showEmptyState() {
         activeListId = null;
         noSelectionNotice.style.display = 'block';
         activeListContent.style.display = 'none';
-        renderSidebar();
+        renderLists();
     }
 
     function renderItems(list) {
@@ -551,7 +632,6 @@
             });
 
             li.querySelector('.btn-delete-small').addEventListener('click', () => deleteItem(list.id, item.id));
-
             itemsListContainer.appendChild(li);
         });
     }
@@ -571,8 +651,7 @@
         packlisten.push(newList);
         saveData();
         newListForm.reset();
-        selectList(id);
-        if (window.innerWidth <= 900) switchTab('active');
+        selectList(id, true); // Wechselt automatisch zu 'Aktuell'
     });
 
     function deleteList(id) {
@@ -581,13 +660,12 @@
             saveData();
             if (activeListId === id) {
                 if (packlisten.length > 0) {
-                    selectList(packlisten[0].id);
+                    selectList(packlisten[0].id, false);
                 } else {
                     showEmptyState();
-                    if (window.innerWidth <= 900) switchTab('lists'); // Zurück zur Listenansicht wenn leer
                 }
             } else {
-                renderSidebar();
+                renderLists();
             }
         }
     }
@@ -598,11 +676,7 @@
 
         const list = packlisten.find(l => l.id === activeListId);
         if (list) {
-            const newItem = {
-                id: 'item-' + Date.now(),
-                name: newItemName.value,
-                packed: false
-            };
+            const newItem = { id: 'item-' + Date.now(), name: newItemName.value, packed: false };
             if (!list.items) list.items = [];
             list.items.push(newItem);
             saveData();
@@ -635,10 +709,7 @@
     activeNotes.addEventListener('input', () => {
         if (!activeListId) return;
         const list = packlisten.find(l => l.id === activeListId);
-        if (list) {
-            list.notes = activeNotes.value;
-            saveData();
-        }
+        if (list) { list.notes = activeNotes.value; saveData(); }
     });
 
     function exportData() {
@@ -664,7 +735,7 @@
                     packlisten = importedData;
                     saveData();
                     init();
-                    if (window.innerWidth <= 900) switchTab('lists');
+                    switchTab('lists');
                 }
             } catch (err) {
                 alert('Fehler beim Laden.');
