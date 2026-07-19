@@ -2,14 +2,14 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- WICHTIG FÜR IPHONE: viewport-fit=cover und user-scalable=no verhindern Darstellungsfehler und Zoom-Bugs -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Liquid Glass Packlisten-Manager</title>
     <style>
         :root {
-            /* Apple Liquid Glass Farbschema */
-            --glass-bg: rgba(255, 255, 255, 0.4);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
             --text-color: #1d1d1f;
             --text-muted: #515154;
             --primary-color: #0071e3; /* Apple Blau */
@@ -24,32 +24,36 @@
             padding: 0;
         }
 
+        /* Flüssige Hintergrund-Animation */
+        @keyframes liquidBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         body {
-            /* Apple-Style Mesh Gradient */
-            background-color: #ff9a9e;
-            background-image: 
-                radial-gradient(at 40% 20%, #f6d365 0px, transparent 50%),
-                radial-gradient(at 80% 0%, #fda085 0px, transparent 50%),
-                radial-gradient(at 0% 50%, #fbc2eb 0px, transparent 50%),
-                radial-gradient(at 80% 50%, #a18cd1 0px, transparent 50%),
-                radial-gradient(at 0% 100%, #84fab0 0px, transparent 50%),
-                radial-gradient(at 80% 100%, #8fd3f4 0px, transparent 50%),
-                radial-gradient(at 0% 0%, #fccb90 0px, transparent 50%);
-            background-attachment: fixed;
-            background-size: cover;
+            /* Animierter Verlauf aus Blau, Grau und Weiß */
+            background: linear-gradient(270deg, #0071e3, #8e8e93, #ffffff, #d1d1d6);
+            background-size: 600% 600%;
+            animation: liquidBg 15s ease infinite;
+            
             color: var(--text-color);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
             line-height: 1.6;
-            min-height: 100vh;
+            min-height: 100dvh; /* Modernes iOS Maß für echte Bildschirmhöhe */
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+            /* Respektiert die iPhone Notch / SafeArea */
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .container {
             max-width: 1100px;
             margin: 0 auto;
             padding: 20px;
-            padding-top: 80px; /* Platz für fixierten Header */
+            padding-top: 85px; /* Platz für fixierten Header plus SafeArea */
+            padding-left: calc(20px + env(safe-area-inset-left));
+            padding-right: calc(20px + env(safe-area-inset-right));
         }
 
         /* Top Bar im Apple-Style */
@@ -58,13 +62,14 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 60px;
+            height: calc(60px + env(safe-area-inset-top));
+            padding-top: env(safe-area-inset-top);
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border-bottom: 1px solid var(--glass-border);
             z-index: 999;
         }
@@ -75,16 +80,16 @@
             letter-spacing: -0.5px;
         }
 
-        /* Hamburger Button */
         .menu-btn {
             position: absolute;
-            left: 20px;
+            left: max(20px, env(safe-area-inset-left));
+            bottom: 12px;
             background: none;
             border: none;
-            font-size: 20pt;
+            font-size: 22pt;
             color: var(--primary-color);
             cursor: pointer;
-            display: none; /* Nur auf Mobile sichtbar */
+            display: none;
             padding: 5px;
             z-index: 1000;
         }
@@ -96,14 +101,12 @@
             width: 100%;
         }
 
-        /* Standard Sidebar (Desktop) */
         .sidebar {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
 
-        /* Liquid Glass Cards */
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(25px);
@@ -134,13 +137,14 @@
             letter-spacing: 0.3px;
         }
 
+        /* IPHONE FIX: font-size muss min 16px sein, sonst zoomt iOS herein! */
         input[type="text"], input[type="date"], textarea {
             width: 100%;
             padding: 12px;
             border: 1px solid var(--glass-border);
             border-radius: 12px;
-            font-size: 11pt;
-            background: rgba(255, 255, 255, 0.4);
+            font-size: 16px !important; 
+            background: rgba(255, 255, 255, 0.5);
             color: var(--text-color);
             transition: all 0.2s ease;
             font-family: inherit;
@@ -149,19 +153,19 @@
 
         input[type="text"]:focus, input[type="date"]:focus, textarea:focus {
             outline: none;
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.8);
             border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2);
         }
 
-        /* Buttons im iOS Look */
         button, .btn-upload {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background: var(--primary-color);
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 11pt;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -177,7 +181,7 @@
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.6);
             color: var(--text-color);
             box-shadow: none;
             border: 1px solid var(--glass-border);
@@ -189,7 +193,6 @@
             margin-top: 15px;
         }
 
-        /* Listen Menüpunkte */
         .list-selector-item {
             display: flex;
             justify-content: space-between;
@@ -198,12 +201,10 @@
             border-radius: 12px;
             margin-bottom: 8px;
             cursor: pointer;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.4);
             border: 1px solid transparent;
             transition: all 0.2s;
         }
-
-        .list-selector-item:hover { background: rgba(255, 255, 255, 0.5); }
 
         .list-selector-item.active {
             background: var(--primary-color);
@@ -211,8 +212,8 @@
             box-shadow: 0 4px 12px rgba(0, 113, 227, 0.2);
         }
 
-        .list-selector-item .title { font-weight: 600; font-size: 11pt; }
-        .list-selector-item .meta { font-size: 9pt; opacity: 0.7; margin-top: 2px; }
+        .list-selector-item .title { font-weight: 600; font-size: 16px; }
+        .list-selector-item .meta { font-size: 12px; opacity: 0.7; margin-top: 2px; }
         .list-selector-item.active .meta { color: rgba(255,255,255,0.8); }
 
         .btn-delete-small {
@@ -220,21 +221,20 @@
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12pt;
+            font-size: 14pt;
             box-shadow: none;
             padding: 0;
         }
 
-        .btn-delete-small:hover { color: var(--danger-color); }
+        .btn-delete-small:hover { color: var(--danger-color); background: rgba(255,255,255,0.3); }
         .list-selector-item.active .btn-delete-small { color: white; }
 
-        /* Listeninhalt */
         .list-header-details {
             margin-bottom: 15px;
             padding-bottom: 12px;
@@ -242,7 +242,7 @@
         }
 
         .list-tags { display: flex; gap: 8px; margin-top: 8px; font-size: 9pt; }
-        .tag-block { background: rgba(255, 255, 255, 0.4); padding: 4px 10px; border-radius: 8px; font-weight: 500; }
+        .tag-block { background: rgba(255, 255, 255, 0.5); padding: 4px 10px; border-radius: 8px; font-weight: 500; }
 
         .add-item-form { display: flex; gap: 10px; margin-bottom: 25px; }
         .add-item-form input { flex-grow: 1; }
@@ -257,45 +257,58 @@
             border-bottom: 1px solid rgba(0,0,0,0.04);
         }
         .item-row:last-child { border-bottom: none; }
-        .item-left { display: flex; align-items: center; gap: 12px; flex-grow: 1; cursor: pointer; }
+        .item-left { display: flex; align-items: center; gap: 15px; flex-grow: 1; cursor: pointer; }
 
-        /* iOS Checkbox */
+        /* =========================================
+           APPLE IOS SLIDER (Toggle Switch) FIX
+           ========================================= */
         .item-row input[type="checkbox"] {
             appearance: none;
             -webkit-appearance: none;
-            width: 22px;
-            height: 22px;
-            border: 2px solid var(--glass-border);
-            border-radius: 50%;
-            background: rgba(255,255,255,0.4);
-            cursor: pointer;
+            width: 50px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
             position: relative;
+            cursor: pointer;
             outline: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            transition: background 0.3s ease, border-color 0.3s ease;
+            flex-shrink: 0; /* Verhindert, dass der Slider gequetscht wird */
+        }
+
+        /* Der Knopf im Slider */
+        .item-row input[type="checkbox"]::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .item-row input[type="checkbox"]:checked {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
+            background: var(--success-color);
+            border-color: var(--success-color);
         }
 
         .item-row input[type="checkbox"]:checked::after {
-            content: '✓';
-            position: absolute;
-            color: white;
-            font-size: 13px;
-            font-weight: bold;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(20px);
         }
+        /* ========================================= */
 
-        .item-text { font-size: 11pt; font-weight: 500; }
+        .item-text { font-size: 16px; font-weight: 500; transition: all 0.2s; }
         .item-row.packed .item-text { text-decoration: line-through; opacity: 0.5; }
 
         .hinweise-textarea { resize: vertical; min-height: 80px; }
         .empty-state, .no-selection-notice { text-align: center; padding: 30px; color: var(--text-muted); font-weight: 500; }
 
-        /* --- IPHONE/MOBILE FIXES & SLIDER --- */
+        /* --- IPHONE/MOBILE FIXES --- */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -303,9 +316,9 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0,0,0,0.2);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             z-index: 1001;
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -315,40 +328,45 @@
             .menu-btn { display: block; }
             .main-layout { grid-template-columns: 1fr; }
 
-            /* Sidebar wird zum echten iOS-Slider */
             .sidebar {
                 position: fixed;
                 top: 0;
                 left: 0;
-                width: 300px;
+                width: 320px;
                 max-width: 85vw;
-                height: 100vh;
-                background: rgba(255, 255, 255, 0.65);
-                backdrop-filter: blur(30px);
-                -webkit-backdrop-filter: blur(30px);
+                height: 100vh; /* Fallback */
+                height: 100dvh;
+                background: rgba(255, 255, 255, 0.7);
+                backdrop-filter: blur(35px);
+                -webkit-backdrop-filter: blur(35px);
                 z-index: 1002;
                 padding: 20px;
-                padding-top: 75px;
+                padding-top: calc(70px + env(safe-area-inset-top));
+                padding-bottom: env(safe-area-inset-bottom);
                 overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
                 transform: translateX(-100%);
                 transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-                box-shadow: 5px 0 25px rgba(0,0,0,0.08);
+                box-shadow: 5px 0 25px rgba(0,0,0,0.1);
             }
 
             .sidebar.open { transform: translateX(0); }
             .sidebar-overlay.show { display: block; opacity: 1; }
-            .content-area { width: 100%; }
         }
 
-        /* --- ABSOLUTES DRUCK-LAYOUT FIX --- */
+        /* --- DRUCK-LAYOUT --- */
         @media print {
-            body { background: white !important; background-image: none !important; color: black !important; }
+            body { background: white !important; background-image: none !important; color: black !important; animation: none !important; }
             header, .sidebar, .menu-btn, .sidebar-overlay, .add-item-form, .btn-delete-small, .btn-print { display: none !important; }
-            .container { padding-top: 0 !important; margin: 0 !important; max-width: 100% !important; }
+            .container { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
             .main-layout { display: block !important; }
             .card { background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
             .item-row { border-bottom: 1px solid #ddd !important; }
-            .item-row input[type="checkbox"] { border: 1px solid #000 !important; background: transparent !important; }
+            
+            /* Für den Druck den Slider als kleines Kästchen anzeigen */
+            .item-row input[type="checkbox"] { width: 20px !important; height: 20px !important; border: 1px solid #000 !important; border-radius: 4px !important; }
+            .item-row input[type="checkbox"]::after { display: none !important; }
+            
             textarea { border: 1px solid #ccc !important; background: transparent !important; }
         }
     </style>
@@ -365,7 +383,7 @@
 <div class="container">
     <div class="main-layout">
         
-        <!-- SIDEBAR SLIDER -->
+        <!-- SIDEBAR -->
         <div class="sidebar" id="sidebar">
             <div class="card">
                 <h2>Neue Liste anlegen</h2>
@@ -402,7 +420,7 @@
         <!-- HAUPTINHALT -->
         <div class="content-area" id="activeListWrapper">
             <div class="card no-selection-notice" id="noSelectionNotice">
-                Wähle links das Menü ☰ aus oder erstelle eine neue Packliste.
+                Wähle links im Menü eine Packliste aus oder erstelle eine neue.
             </div>
             
             <div id="activeListContent" style="display: none;">
@@ -434,7 +452,6 @@
                         Die Liste ist noch leer.
                     </div>
 
-                    <!-- RE-INTEGRIERTES DRUCK-FEATURE -->
                     <button class="btn-print" onclick="window.print()">🖨️ Liste drucken / PDF erstellen</button>
                 </div>
             </div>
