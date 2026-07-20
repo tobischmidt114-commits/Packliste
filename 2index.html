@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamischer Audio Visualizer</title>
+    <style>
+        /* Setzt alles auf Vollbild und entfernt Scrollbalken */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0d0d1a; /* Dunkler, bläulicher Hintergrund */
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Styling für den Start-Button (wichtig für Browser-Berechtigungen) */
+        #start-btn {
+            z-index: 10;
+            padding: 16px 32px;
+            font-size: 1.2rem;
+            color: white;
+            background: linear-gradient(45deg, #ff007f, #7000ff);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(112, 0, 255, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(255, 0, 127, 0.6);
+        }
+    </style>
+</head>
+<body>
+
+    <button id="start-btn">Mikrofon freigeben & Vollbild starten</button>
+    <canvas id="visualizer"></canvas>
+
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+
+        // Canvas an Fenstergröße anpassen
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let audioContext;
+        let analyser;
+        let dataArray;
+
+        // Der Browser erfordert eine Nutzerinteraktion (Klick), um Audio und Vollbild zu starten
+        startBtn.addEventListener('click', async () => {
+            try {
+                // 1. Vollbildmodus anfordern (Safari nutzt webkitRequestFullscreen)
+                const docElm = document.documentElement;
+                if (docElm.requestFullscreen) {
+                    docElm.requestFullscreen();
+                } else if (docElm.webkitRequestFullscreen) {
+                    docElm.webkitRequestFullscreen();
+                }
+
+                // 2. Mikrofon-Zugriff anfragen
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // 3. Web Audio API initialisieren (Safari braucht window.webkitAudioContext)
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioContext = new AudioContext();
+                
+                const source = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                
+                // Die FFT-Größe bestimmt, wie viele Balken generiert werden (höher = mehr Balken)
+                analyser.fftSize = 256;
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+                
+                source.connect(analyser);
+                
+                // UI aufräumen und Animation starten
+                startBtn.style.display = 'none';
+                animate();
+
+            } catch (err) {
+                alert("Fehler: Mikrofon-Zugriff wurde verweigert oder wird nicht unterstützt.");
+                console.error(err);
+            }
+        });
+
+        // Animations-Loop für die Balken
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Aktuelle Frequenzdaten abrufen
+            analyser.getByteFrequencyData(dataArray);
+
+            // Hintergrund leicht transparent zeichnen für einen "Trailing"-Effekt (Leuchtspur)
+            ctx.fillStyle = 'rgba(13, 13, 26, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const barWidth = (canvas.width / dataArray.length) * 2.5;
+            let barHeight;
+            let x = 0;
+
+            for (let i = 0; i < dataArray.length; i++) {
+                barHeight = dataArray[i] * 2.5; // Multiplikator für die Höhe der Balken
+
+                // Dynamische Farbgebung basierend auf der Frequenz (Bass = Pink, Höhen = Blau)
+                const r = barHeight + (25 * (i / dataArray.length));
+                const g = 50;
+                const b = 250 - (barHeight / 2);
+
+                ctx.fillStyle = `rgb(${r},${g},${b})`;
+                
+                // Balken von der Mitte des Bildschirms nach oben und unten zeichnen
+                ctx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
+                
+                x += barWidth + 2; // Abstand zwischen den Balken
+            }
+        }
+    </script>
+</body>
+</html>
