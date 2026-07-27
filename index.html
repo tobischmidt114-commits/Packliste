@@ -16,7 +16,7 @@
             --nav-opacity: 0.7;
             --nav-bg: rgba(255, 255, 255, var(--nav-opacity));
             --nav-item-color: #636366;
-            --nav-item-active-color: #007aff;
+            --nav-item-active-color: var(--primary);
             
             --text-main: #1c1c1e;
             --text-muted: #6c6c70;
@@ -49,11 +49,10 @@
             
             --nav-bg: rgba(28, 28, 32, var(--nav-opacity));
             --nav-item-color: #8e8e93;
-            --nav-item-active-color: #0a84ff;
+            --nav-item-active-color: var(--primary);
             
             --text-main: #f2f2f7;
             --text-muted: #98989d;
-            --primary: #0a84ff;
             --primary-glow: rgba(10, 132, 255, 0.45);
             
             --input-bg: rgba(0, 0, 0, 0.35);
@@ -829,7 +828,7 @@
     <div id="view-design" class="view-section">
         <div class="card">
             <div class="card-header">
-                <h2>Erscheinungsbild</h2>
+                <h2>Erscheinungsbild & Farben</h2>
             </div>
 
             <!-- DARK MODE TOGGLE -->
@@ -847,8 +846,17 @@
                 <input type="range" id="navOpacitySlider" min="20" max="95" value="70" style="width: 100%;" oninput="updateNavOpacity(this.value)">
             </div>
             
+            <!-- AKZENTFARBE / PRIMARY COLOR -->
+            <label>Haupt-Akzentfarbe der App</label>
+            <div class="color-picker-container" style="margin-bottom: 20px;">
+                <div class="color-picker-wrapper">
+                    <span>Hauptfarbe</span>
+                    <input type="color" id="colorPrimary" class="color-picker" value="#007aff">
+                </div>
+            </div>
+
             <!-- EIGENE FLUID FARBEN -->
-            <label>Fluid Canvas Farben (inkl. Cursor)</label>
+            <label>Fluid Canvas Farben (Hintergrund-Blobs)</label>
             <div class="color-picker-container" style="margin-bottom: 20px;">
                 <div class="color-picker-wrapper">
                     <span>Blob 1</span>
@@ -913,6 +921,7 @@
     let isDarkMode = localStorage.getItem('dark_mode') === 'true';
     let navOpacity = localStorage.getItem('nav_opacity') || '70';
     let currentTheme = parseInt(localStorage.getItem('theme_id')) || 1;
+    let primaryColor = localStorage.getItem('primary_color') || '#007aff';
     
     // Globale Farb-State für die Fluid Blobs
     let blobColors = JSON.parse(localStorage.getItem('blob_colors')) || ['#007aff', '#5856d6', '#ff2d55', '#34c759'];
@@ -1276,11 +1285,20 @@
         document.getElementById('opacityValText').textContent = navOpacity + '%';
         document.getElementById('navOpacitySlider').value = navOpacity;
         
-        // Color Picker Werte setzen
+        // App Primary Color setzen
+        updatePrimaryCss(primaryColor);
+        document.getElementById('colorPrimary').value = primaryColor;
+
+        // Color Picker Werte für Blobs setzen
         document.getElementById('colorBlob0').value = blobColors[0];
         document.getElementById('colorBlob1').value = blobColors[1];
         document.getElementById('colorBlob2').value = blobColors[2];
         document.getElementById('colorBlob3').value = blobColors[3];
+    }
+
+    function updatePrimaryCss(val) {
+        document.documentElement.style.setProperty('--primary', val);
+        document.documentElement.style.setProperty('--primary-glow', hexToRgba(val, 0.35));
     }
 
     function toggleDarkMode() {
@@ -1295,14 +1313,18 @@
         applySettings();
     }
 
-    // Erweiterung der setTheme Funktion, um direkt die Fluid Farben mit anzupassen
     function setTheme(id, btnElem, colorArray) {
         currentTheme = id;
         localStorage.setItem('theme_id', id);
         
-        if(colorArray) {
+        if (colorArray) {
             blobColors = colorArray;
             localStorage.setItem('blob_colors', JSON.stringify(blobColors));
+            
+            // Setze auch die Hauptfarbe passend zum Theme
+            primaryColor = colorArray[0];
+            localStorage.setItem('primary_color', primaryColor);
+            
             applySettings();
         }
         
@@ -1310,8 +1332,16 @@
         if (btnElem) btnElem.classList.add('active');
     }
     
-    // Live-Update der Color Picker für die Fluid Blobs
+    // Live-Update der Color Picker für Hauptfarbe & Blobs
     function setupColorPickers() {
+        // Picker für die App-Hauptfarbe
+        document.getElementById('colorPrimary').addEventListener('input', (e) => {
+            primaryColor = e.target.value;
+            localStorage.setItem('primary_color', primaryColor);
+            updatePrimaryCss(primaryColor);
+        });
+
+        // Picker für die Fluid Canvas Blobs
         for (let i = 0; i < 4; i++) {
             document.getElementById(`colorBlob${i}`).addEventListener('input', (e) => {
                 blobColors[i] = e.target.value;
@@ -1367,7 +1397,7 @@
             }
         });
 
-        // Dynamic Blobs Array greift jetzt auf die Indizes für blobColors zurück
+        // Dynamic Blobs Array greift auf die Indizes für blobColors zurück
         const blobs = [
             { x: width * 0.2, y: height * 0.3, vx: 0.8, vy: 0.6, radius: 260, colorIdx: 0, alpha: 0.45 },
             { x: width * 0.8, y: height * 0.7, vx: -0.6, vy: -0.5, radius: 300, colorIdx: 1, alpha: 0.45 },
