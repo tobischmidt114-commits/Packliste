@@ -3,621 +3,1311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Liquid Glass Packlisten-Manager</title>
+    <title>Liquid Glass Packlisten-Manager Pro</title>
     <style>
         :root {
-            /* Standard Light Mode (Liquid Glass) */
-            --glass-bg: rgba(255, 255, 255, 0.45);
-            --glass-border: rgba(255, 255, 255, 0.6);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+            /* Apple Liquid Glass Palette (Light Mode) */
+            --glass-bg: rgba(255, 255, 255, 0.42);
+            --glass-card: rgba(255, 255, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.7);
+            --glass-highlight: rgba(255, 255, 255, 0.9);
+            --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
             
-            /* Nav RGB-Werte getrennt, um Transparenz flexibel per Slider zu steuern */
-            --nav-r: 255; --nav-g: 255; --nav-b: 255;
-            --nav-opacity: 0.65;
-            --nav-bg: rgba(var(--nav-r), var(--nav-g), var(--nav-b), var(--nav-opacity));
+            --nav-opacity: 0.7;
+            --nav-bg: rgba(255, 255, 255, var(--nav-opacity));
+            --nav-item-color: #636366;
+            --nav-item-active-color: #007aff;
             
-            --nav-item-active: rgba(0, 0, 0, 0.1);
-            --nav-item-color: #515154;
-            --nav-item-active-color: #0071e3;
-            --text-color: #1d1d1f;
-            --text-muted: #515154;
-            --primary-color: #0071e3;
-            --danger-color: #ff3b30;
-            --success-color: #34c759;
-            --input-bg: rgba(255, 255, 255, 0.5);
-            --item-row-border: rgba(0, 0, 0, 0.05);
-            --border-radius: 18px;
+            --text-main: #1c1c1e;
+            --text-muted: #6c6c70;
+            --primary: #007aff;
+            --primary-glow: rgba(0, 122, 255, 0.35);
+            --danger: #ff3b30;
+            --success: #34c759;
+            --warning: #ff9500;
+            
+            --input-bg: rgba(255, 255, 255, 0.6);
+            --input-border: rgba(211, 211, 218, 0.5);
+            --item-border: rgba(0, 0, 0, 0.05);
+            --radius-xl: 28px;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
+            
+            --theme-color-1: #007aff;
+            --theme-color-2: #5856d6;
+            --theme-color-3: #ff2d55;
         }
 
-        /* Dark Mode Override */
+        /* Dark Mode Override (iOS Dark Glass) */
         body.dark-mode {
-            --glass-bg: rgba(30, 30, 32, 0.5);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --glass-bg: rgba(22, 22, 26, 0.5);
+            --glass-card: rgba(32, 32, 38, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.14);
+            --glass-highlight: rgba(255, 255, 255, 0.25);
+            --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2);
             
-            --nav-r: 30; --nav-g: 30; --nav-b: 32;
+            --nav-bg: rgba(28, 28, 32, var(--nav-opacity));
+            --nav-item-color: #8e8e93;
+            --nav-item-active-color: #0a84ff;
             
-            --nav-item-active: rgba(255, 255, 255, 0.15);
-            --nav-item-color: #a0a0a5;
-            --nav-item-active-color: #ffffff;
-            --text-color: #ffffff;
-            --text-muted: #a0a0a5;
-            --primary-color: #0a84ff;
-            --input-bg: rgba(0, 0, 0, 0.3);
-            --item-row-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f2f2f7;
+            --text-muted: #98989d;
+            --primary: #0a84ff;
+            --primary-glow: rgba(10, 132, 255, 0.45);
+            
+            --input-bg: rgba(0, 0, 0, 0.35);
+            --input-border: rgba(255, 255, 255, 0.12);
+            --item-border: rgba(255, 255, 255, 0.08);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        /* --- SCHNELLERE, VERSPIELTE HINTERGRUND-ANIMATION --- */
-        @keyframes playfulBg {
-            0% { background-position: 0% 50%; }
-            25% { background-position: 50% 100%; }
-            50% { background-position: 100% 50%; }
-            75% { background-position: 50% 0%; }
-            100% { background-position: 0% 50%; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
-
-        /* Die 10 Hintergrund-Gradienten */
-        .bg-1 { background: linear-gradient(270deg, #0071e3, #8e8e93, #ffffff, #d1d1d6); } 
-        .bg-2 { background: linear-gradient(270deg, #ff9a9e, #fecfef, #f6d365, #fda085); } 
-        .bg-3 { background: linear-gradient(270deg, #13547a, #80d0c7, #13547a, #20e2d7); } 
-        .bg-4 { background: linear-gradient(270deg, #fa709a, #fee140, #ff9a44, #ff5e62); } 
-        .bg-5 { background: linear-gradient(270deg, #0f2027, #203a43, #2c5364, #1b2735); } 
-        .bg-6 { background: linear-gradient(270deg, #43e97b, #38f9d7, #43e97b, #4facfe); } 
-        .bg-7 { background: linear-gradient(270deg, #a18cd1, #fbc2eb, #8fd3f4, #a1c4fd); } 
-        .bg-8 { background: linear-gradient(270deg, #ff0844, #ffb199, #ff0844, #f5576c); } 
-        .bg-9 { background: linear-gradient(270deg, #30cfd0, #330867, #30cfd0, #b224ef); } 
-        .bg-10 { background: linear-gradient(270deg, #000000, #434343, #1a1a1a, #000000); }
 
         body {
-            background-size: 400% 400%;
-            /* 6 Sekunden (statt 15s) für ein flüssiges, schnelles Wabern */
-            animation: playfulBg 6s ease-in-out infinite; 
-            color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-            line-height: 1.6;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            color: var(--text-main);
             min-height: 100dvh;
             overflow-x: hidden;
-            padding-bottom: calc(100px + env(safe-area-inset-bottom)); 
+            background-color: #0f1015;
+            line-height: 1.5;
+            padding-bottom: calc(110px + env(safe-area-inset-bottom));
             -webkit-font-smoothing: antialiased;
             transition: color 0.3s ease;
         }
 
+        /* --- DYNAMISCHER BACKGROUND CANVAS --- */
+        #fluid-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+            filter: blur(50px);
+            opacity: 0.85;
+            transition: opacity 0.5s ease;
+        }
+
         .container {
-            max-width: 900px;
+            max-width: 860px;
             margin: 0 auto;
             padding: 20px;
-            padding-top: calc(85px + env(safe-area-inset-top)); 
-            padding-left: calc(20px + env(safe-area-inset-left));
-            padding-right: calc(20px + env(safe-area-inset-right));
+            padding-top: calc(80px + env(safe-area-inset-top));
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
         }
 
         /* --- HEADER --- */
         header {
-            position: fixed; top: 0; left: 0; width: 100%;
-            height: calc(60px + env(safe-area-inset-top));
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(64px + env(safe-area-inset-top));
             padding-top: env(safe-area-inset-top);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
             background: var(--glass-bg);
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            backdrop-filter: blur(35px) saturate(190%);
+            -webkit-backdrop-filter: blur(35px) saturate(190%);
             border-bottom: 1px solid var(--glass-border);
-            z-index: 999; transition: background 0.3s ease, border-color 0.3s ease;
+            z-index: 900;
+            transition: all 0.3s ease;
         }
-        header h1 { font-size: 15pt; font-weight: 600; letter-spacing: -0.5px; }
 
-        /* --- TAB LOGIK --- */
-        .view-section { display: none; animation: fadeIn 0.4s ease forwards; }
-        .view-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+            background: linear-gradient(135deg, var(--text-main), var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-        /* --- CARDS & FORMS --- */
+        .header-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+            background: var(--primary-glow);
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            -webkit-text-fill-color: initial;
+        }
+
+        /* --- VIEWS / SECTIONS --- */
+        .view-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(12px) scale(0.98);
+            transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .view-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* --- LIQUID GLASS CARDS --- */
         .card {
-            background: var(--glass-bg); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-            border: 1px solid var(--glass-border); border-radius: var(--border-radius);
-            padding: 25px; box-shadow: var(--glass-shadow); margin-bottom: 25px;
-            transition: background 0.3s, border-color 0.3s;
-        }
-        .card h2 { font-size: 14pt; margin-bottom: 15px; font-weight: 600; border-bottom: 1px solid var(--item-row-border); padding-bottom: 8px; }
-
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 8.5pt; font-weight: 600; margin-bottom: 5px; color: var(--text-muted); text-transform: uppercase; }
-
-        input[type="text"], input[type="date"], textarea {
-            width: 100%; padding: 14px; border: 1px solid var(--glass-border); border-radius: 12px;
-            font-size: 16px !important; background: var(--input-bg); color: var(--text-color);
-            transition: all 0.2s ease; font-family: inherit; -webkit-appearance: none;
-        }
-        input:focus, textarea:focus { outline: none; background: var(--glass-bg); border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
-
-        button, .btn-upload {
-            width: 100%; padding: 14px; background: var(--primary-color); color: white; border: none; border-radius: 12px;
-            font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-block; text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.2); -webkit-tap-highlight-color: transparent;
-        }
-        button:active, .btn-upload:active { transform: scale(0.97); }
-
-        .btn-secondary { background: var(--input-bg); color: var(--text-color); box-shadow: none; border: 1px solid var(--glass-border); }
-        .btn-print { background: var(--success-color); box-shadow: 0 4px 12px rgba(52, 199, 89, 0.2); margin-top: 15px; }
-
-        /* --- LISTEN-VERWALTUNG --- */
-        .list-selector-item {
-            display: flex; justify-content: space-between; align-items: center; padding: 16px; border-radius: 14px; margin-bottom: 10px;
-            cursor: pointer; background: var(--input-bg); border: 1px solid var(--glass-border); transition: all 0.2s;
-        }
-        .list-selector-item:hover { background: var(--glass-bg); }
-        .list-selector-item.is-active-list { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3); }
-        .list-selector-item .title { font-weight: 600; font-size: 16px; }
-        .list-selector-item .meta { font-size: 12px; opacity: 0.7; margin-top: 4px; }
-        .list-selector-item.is-active-list .meta { color: rgba(255,255,255,0.8); }
-
-        .btn-delete-small {
-            background: none; border: none; color: var(--text-muted); cursor: pointer; width: 34px; height: 34px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 14pt; box-shadow: none; padding: 0;
-        }
-        .btn-delete-small:hover { color: var(--danger-color); background: var(--glass-bg); }
-        .list-selector-item.is-active-list .btn-delete-small { color: white; }
-
-        /* --- AKTUELLE LISTE --- */
-        .list-header-details { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--item-row-border); }
-        .list-tags { display: flex; gap: 8px; margin-top: 8px; font-size: 10pt; }
-        .tag-block { background: var(--input-bg); padding: 4px 10px; border-radius: 8px; font-weight: 500; border: 1px solid var(--glass-border); }
-
-        .add-item-form { display: flex; gap: 10px; margin-bottom: 25px; }
-        .add-item-form input { flex-grow: 1; }
-        .add-item-form button { width: auto; padding: 0 24px; }
-
-        .items-list { list-style: none; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 6px; border-bottom: 1px solid var(--item-row-border); }
-        .item-row:last-child { border-bottom: none; }
-        .item-left { display: flex; align-items: center; gap: 15px; flex-grow: 1; cursor: pointer; }
-
-        .item-row input[type="checkbox"] {
-            appearance: none; -webkit-appearance: none; width: 50px; height: 30px; background: var(--input-bg); border: 1px solid var(--glass-border); border-radius: 15px;
-            position: relative; cursor: pointer; outline: none; transition: all 0.3s ease; flex-shrink: 0;
-        }
-        .item-row input[type="checkbox"]::after {
-            content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; background: white; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .item-row input[type="checkbox"]:checked { background: var(--success-color); border-color: var(--success-color); }
-        .item-row input[type="checkbox"]:checked::after { transform: translateX(20px); }
-
-        .item-text { font-size: 16px; font-weight: 500; transition: all 0.2s; }
-        .item-row.packed .item-text { text-decoration: line-through; opacity: 0.4; }
-        .hinweise-textarea { resize: vertical; min-height: 100px; }
-        .empty-state { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 500; background: var(--input-bg); border-radius: 14px; border: 2px dashed var(--glass-border); }
-
-        /* --- DESIGN KONFIGURATOR --- */
-        .design-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 15px; margin-top: 15px; }
-        .bg-preview-btn { width: 100%; aspect-ratio: 1; border-radius: 50%; border: 3px solid var(--glass-border); cursor: pointer; transition: transform 0.2s; padding: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .bg-preview-btn:hover { transform: scale(1.1); }
-        .bg-preview-btn.active { border-color: var(--text-color); transform: scale(1.1); box-shadow: 0 0 0 2px var(--text-color); }
-
-        /* Slider Styling (Apple Style) */
-        input[type="range"] {
-            -webkit-appearance: none; width: 100%; height: 6px; background: rgba(0,0,0,0.15); border-radius: 5px; outline: none; margin-top: 10px; cursor: pointer;
-        }
-        .dark-mode input[type="range"] { background: rgba(255,255,255,0.2); }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: white; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            background: var(--glass-card);
+            backdrop-filter: blur(40px) saturate(200%);
+            -webkit-backdrop-filter: blur(40px) saturate(200%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            box-shadow: var(--glass-shadow), inset 0 1px 1px var(--glass-highlight);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.3s ease;
         }
 
-        /* --- BOTTOM NAVIGATION BAR --- */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--item-border);
+        }
+
+        .card h2 {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- FORM ELEMENTS --- */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            background: var(--input-bg);
+            color: var(--text-main);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            font-family: inherit;
+            outline: none;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            background: var(--glass-card);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 6px 20px var(--primary-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            filter: brightness(1.08);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+            filter: brightness(0.95);
+        }
+
+        .btn-secondary {
+            background: var(--input-bg);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            box-shadow: 0 6px 20px rgba(255, 59, 48, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success);
+            box-shadow: 0 6px 20px rgba(52, 199, 89, 0.3);
+        }
+
+        /* --- PROGRESSED PACKING HEADER --- */
+        .progress-box {
+            margin-bottom: 20px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        .progress-bar-bg {
+            height: 10px;
+            width: 100%;
+            background: var(--input-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            border-radius: 10px;
+            transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+
+        /* --- ITEM CATEGORIES & LISTS --- */
+        .category-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin: 20px 0 10px 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .items-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.25s ease;
+        }
+
+        .item-row:hover {
+            background: var(--glass-card);
+        }
+
+        .item-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        /* iOS Custom Switch/Checkbox */
+        .custom-checkbox {
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border: 2px solid var(--text-muted);
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .custom-checkbox:checked {
+            background: var(--success);
+            border-color: var(--success);
+            transform: scale(1.05);
+        }
+
+        .custom-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 9px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .item-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s ease;
+        }
+
+        .item-row.packed .item-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            color: var(--danger);
+            background: rgba(255, 59, 48, 0.12);
+        }
+
+        /* --- LIST SELECTOR CARD --- */
+        .list-card-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-radius: var(--radius-lg);
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .list-card-item:hover {
+            background: var(--glass-card);
+            transform: translateY(-2px);
+        }
+
+        .list-card-item.active-list {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px var(--primary-glow);
+        }
+
+        .list-card-item.active-list .list-meta {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .list-title {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .list-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* --- QUICK FILTER BAR --- */
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .filter-chip {
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* --- FLOATING BOTTOM NAV BAR (iOS Glass Pill) --- */
+        .bottom-nav-wrapper {
+            position: fixed;
+            bottom: max(20px, env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: max-content;
+            max-width: 92vw;
+        }
+
         .bottom-nav {
-            position: fixed; bottom: max(20px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
-            background: var(--nav-bg); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px);
-            border-radius: 40px; padding: 8px; display: flex; gap: 5px; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            border: 1px solid var(--glass-border); transition: background 0.3s; width: max-content; max-width: 95vw;
+            background: var(--nav-bg);
+            backdrop-filter: blur(40px) saturate(210%);
+            -webkit-backdrop-filter: blur(40px) saturate(210%);
+            border-radius: 40px;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25), inset 0 1px 1px var(--glass-highlight);
+            position: relative;
         }
+
+        .nav-slider {
+            position: absolute;
+            top: 6px;
+            bottom: 6px;
+            left: 6px;
+            width: 60px;
+            background: var(--glass-card);
+            border-radius: 30px;
+            border: 1px solid var(--glass-highlight);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 0;
+        }
+
         .nav-item {
-            background: transparent; border: none; border-radius: 30px; padding: 12px 20px; color: var(--nav-item-color);
-            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: none; flex-direction: column; gap: 3px;
+            position: relative;
+            z-index: 1;
+            background: transparent;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 30px;
+            color: var(--nav-item-color);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            font-size: 10px;
+            font-weight: 600;
+            transition: color 0.25s ease;
+            min-width: 62px;
         }
-        .nav-item span { font-size: 10px; font-weight: 600; display: block; }
-        .nav-item svg { width: 24px; height: 24px; fill: currentColor; }
-        .nav-item.active { background: var(--nav-item-active); color: var(--nav-item-active-color); }
 
-        @media (max-width: 600px) {
-            .nav-item { padding: 10px 14px; }
-            .nav-item span { display: none; }
+        .nav-item.active {
+            color: var(--nav-item-active-color);
         }
 
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+            transition: transform 0.2s ease;
+        }
+
+        .nav-item:active svg {
+            transform: scale(0.88);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-weight: 500;
+            background: var(--input-bg);
+            border-radius: var(--radius-lg);
+            border: 2px dashed var(--glass-border);
+        }
+
+        /* --- THEME PREVIEWS --- */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .theme-btn {
+            height: 55px;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--glass-border);
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-btn.active {
+            border-color: var(--primary);
+            transform: scale(1.06);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        /* Print Override */
         @media print {
-            body { background: white !important; color: black !important; animation: none !important; }
-            header, .bottom-nav, .add-item-form, .btn-delete-small, .btn-print, #view-new, #view-lists, #view-backup, #view-design { display: none !important; }
-            .container { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
-            .view-section { display: block !important; }
-            .card { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
-            .item-row { border-bottom: 1px solid #ddd !important; }
-            .item-row input[type="checkbox"] { width: 20px !important; height: 20px !important; border: 1px solid #000 !important; border-radius: 4px !important; }
-            .item-row input[type="checkbox"]::after { display: none !important; }
-            textarea { border: 1px solid #ccc !important; background: transparent !important; }
+            #fluid-canvas, header, .bottom-nav-wrapper, .filter-bar, .add-item-box, .btn-print-hide {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+            }
+            .card {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+            .custom-checkbox {
+                border-color: #000 !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-item span { display: none; }
+            .nav-item { padding: 12px 14px; min-width: 48px; }
+            .container { padding-left: 14px; padding-right: 14px; }
         }
     </style>
 </head>
-<body class="bg-1"> 
+<body>
 
+<!-- DYNAMISCHER FLUID BACKGROUND CANVAS -->
+<canvas id="fluid-canvas"></canvas>
+
+<!-- HEADER -->
 <header>
-    <h1>Packlisten-Manager</h1>
+    <div class="header-title">
+        <span>🎒 Packliste</span>
+        <span class="header-badge">Liquid Glass</span>
+    </div>
+    <button class="btn-icon" onclick="switchTab('design')" title="Design">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+        </svg>
+    </button>
 </header>
 
 <div class="container">
-    
-    <!-- SLOT 1: NEUE LISTE -->
-    <div id="view-new" class="view-section">
-        <div class="card">
-            <h2>Neue Packliste anlegen</h2>
-            <form id="newListForm">
-                <div class="form-group">
-                    <label for="listName">Reise / Event</label>
-                    <input type="text" id="listName" placeholder="z. B. Kroatien, Klassenfahrt" required>
-                </div>
-                <div class="form-group">
-                    <label for="listDate">Datum</label>
-                    <input type="date" id="listDate" required>
-                </div>
-                <div class="form-group">
-                    <label for="listPurpose">Kategorie</label>
-                    <input type="text" id="listPurpose" placeholder="z. B. Strandurlaub, Sportcamp" required>
-                </div>
-                <button type="submit" style="margin-top: 10px;">Liste erstellen & öffnen</button>
-            </form>
-        </div>
-    </div>
 
-    <!-- SLOT 2: LISTEN VERWALTEN -->
-    <div id="view-lists" class="view-section">
-        <div class="card">
-            <h2>Deine Listen</h2>
-            <div id="savedListsContainer"></div>
-        </div>
-    </div>
-
-    <!-- SLOT 3: AKTUELLE LISTE BEARBEITEN -->
-    <div id="view-active" class="view-section">
+    <!-- TAB 1: AKTUELLE LISTE -->
+    <div id="view-active" class="view-section active">
         <div id="noSelectionNotice" class="empty-state">
-            Wähle im Menü "Listen" eine Packliste aus oder erstelle eine "Neu".
+            <p>Keine aktive Liste ausgewählt.</p>
+            <p style="font-size: 13px; margin-top: 8px;">Erstelle eine neue Liste oder wähle eine aus deinem Speicher.</p>
         </div>
-        
+
         <div id="activeListContent" style="display: none;">
+            <!-- CARD: LIST HEADER INFO -->
             <div class="card">
-                <div class="list-header-details">
-                    <h2 id="activeTitle" style="border: none; margin-bottom: 5px; font-size: 22pt;">-</h2>
-                    <div class="list-tags">
-                        <div class="tag-block">Datum: <strong id="activeDate">-</strong></div>
-                        <div class="tag-block">Zweck: <strong id="activePurpose">-</strong></div>
+                <div class="card-header">
+                    <div>
+                        <h2 id="activeTitle">-</h2>
+                        <p id="activeSubtitle" style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">-</p>
+                    </div>
+                </div>
+
+                <!-- PROGRESS BAR -->
+                <div class="progress-box">
+                    <div class="progress-info">
+                        <span>Pack-Fortschritt</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progressBarFill"></div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="activeNotes">Notizen & wichtige Infos</label>
-                    <textarea id="activeNotes" class="hinweise-textarea" placeholder="Hier Notizen eintragen..."></textarea>
+                    <label>Wichtige Hinweise & Notizen</label>
+                    <textarea id="activeNotes" rows="2" placeholder="Flugzeiten, Hoteladresse, Packtipps..."></textarea>
                 </div>
             </div>
 
+            <!-- CARD: ITEMS PACKEN -->
             <div class="card">
-                <h2>Was muss eingepackt werden?</h2>
-                <form id="addItemForm" class="add-item-form">
-                    <input type="text" id="newItemName" placeholder="Neuer Gegenstand..." required>
-                    <button type="submit">Hinzufügen</button>
-                </form>
-                <ul class="items-list" id="itemsListContainer"></ul>
-                <div id="itemsEmptyState" class="empty-state" style="display: none; padding: 20px;">
-                    Die Liste ist noch leer.
+                <div class="card-header">
+                    <h2>Gegenstände</h2>
+                    <button class="btn-icon btn-print-hide" onclick="window.print()" title="Drucken">🖨️</button>
                 </div>
-                <button class="btn-print" onclick="window.print()">🖨️ Liste drucken</button>
+
+                <!-- SCHNELL-FILTER -->
+                <div class="filter-bar btn-print-hide">
+                    <div class="filter-chip active" onclick="setFilter('all', this)">Alle</div>
+                    <div class="filter-chip" onclick="setFilter('open', this)">Offen</div>
+                    <div class="filter-chip" onclick="setFilter('packed', this)">Gepackt</div>
+                </div>
+
+                <!-- ADD ITEM INPUT -->
+                <form id="addItemForm" style="display: flex; gap: 8px; margin-bottom: 20px;" class="btn-print-hide">
+                    <input type="text" id="newItemName" placeholder="Neues Item..." required style="flex-grow: 1;">
+                    <select id="newItemCategory" style="width: 130px;">
+                        <option value="Kleidung">👕 Kleidung</option>
+                        <option value="Elektronik">⚡ Elektronik</option>
+                        <option value="Hygiene">🧴 Hygiene</option>
+                        <option value="Dokumente">📄 Papiere</option>
+                        <option value="Sonstiges" selected>📦 Sonstiges</option>
+                    </select>
+                    <button type="submit" class="btn" style="width: auto; padding: 0 18px;">+</button>
+                </form>
+
+                <div id="itemsContainer"></div>
+                <div id="itemsEmptyState" class="empty-state" style="display: none;">
+                    Keine Einträge für diesen Filter gefunden.
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- SLOT 4: BACKUP -->
+    <!-- TAB 2: LISTEN VERWALTEN -->
+    <div id="view-lists" class="view-section">
+        <div class="card">
+            <div class="card-header">
+                <h2>Meine Packlisten</h2>
+            </div>
+            <div id="savedListsContainer"></div>
+        </div>
+    </div>
+
+    <!-- TAB 3: NEUE LISTE ANLEGEN -->
+    <div id="view-new" class="view-section">
+        <div class="card">
+            <div class="card-header">
+                <h2>Neue Packliste erstellen</h2>
+            </div>
+            <form id="newListForm">
+                <div class="form-group">
+                    <label for="listName">Reise / Zielort</label>
+                    <input type="text" id="listName" placeholder="z.B. Tokio, Sommerurlaub, Camping" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group">
+                        <label for="listDate">Datum</label>
+                        <input type="date" id="listDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="listPurpose">Kategorie</label>
+                        <input type="text" id="listPurpose" placeholder="z.B. Urlaub, Business">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="listPreset">Vorlage (optional befüllen)</label>
+                    <select id="listPreset">
+                        <option value="none">-- Leere Liste --</option>
+                        <option value="beach">🏖️ Strandurlaub</option>
+                        <option value="city">🏙️ Städtetrip</option>
+                        <option value="camping">⛰️ Outdoor & Camping</option>
+                        <option value="business">💼 Geschäftsreise</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn" style="margin-top: 10px;">Liste erstellen & öffnen</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TAB 4: BACKUP & IMPORTE -->
     <div id="view-backup" class="view-section">
         <div class="card">
-            <h2>Daten-Sicherung</h2>
-            <p style="margin-bottom: 20px; font-size: 11pt; color: var(--text-muted);">Speichere deine Packlisten auf dem Gerät oder übertrage sie auf ein anderes Gerät.</p>
-            <button type="button" class="btn-secondary" onclick="exportData()" style="margin-bottom: 15px;">💾 Backup Herunterladen</button>
-            <label class="btn-upload btn-secondary" for="importFile">📂 Backup Laden</label>
+            <div class="card-header">
+                <h2>Datensicherung & Import</h2>
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+                Exportiere deine Listen als JSON-Datei zur Sicherung oder importiere bestehende Daten.
+            </p>
+            <button type="button" class="btn btn-secondary" onclick="exportData()" style="margin-bottom: 12px;">
+                💾 Backup Herunterladen
+            </button>
+            <label class="btn btn-secondary" for="importFile" style="margin-bottom: 12px; cursor: pointer;">
+                📂 Backup Laden (.json)
+            </label>
             <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
         </div>
     </div>
 
-    <!-- SLOT 5: DESIGN & THEMES -->
+    <!-- TAB 5: DESIGN & THEME CONFIG -->
     <div id="view-design" class="view-section">
         <div class="card">
-            <h2>Erscheinungsbild</h2>
-            
-            <!-- Dark Mode Toggle -->
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 15px; background: var(--input-bg); border-radius: 12px; border: 1px solid var(--glass-border);">
-                <strong style="font-size: 12pt;">Dark Mode</strong>
-                <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()" style="
-                    appearance: none; width: 50px; height: 30px; background: rgba(0,0,0,0.2); border-radius: 15px;
-                    position: relative; cursor: pointer; outline: none; transition: 0.3s;
-                ">
-                <style>
-                    #darkModeToggle::after {
-                        content: ''; position: absolute; top: 2px; left: 2px; width: 26px; height: 26px;
-                        background: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-                    }
-                    #darkModeToggle:checked { background: var(--success-color); }
-                    #darkModeToggle:checked::after { transform: translateX(20px); }
-                </style>
+            <div class="card-header">
+                <h2>Erscheinungsbild</h2>
             </div>
 
-            <!-- OPACITY SLIDER FÜR DIE NAV -->
-            <div style="margin-bottom: 25px; padding: 15px; background: var(--input-bg); border-radius: 12px; border: 1px solid var(--glass-border);">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <strong style="font-size: 12pt;">Navigations-Transparenz</strong>
-                    <span id="opacityValueText" style="font-weight: bold; color: var(--primary-color);">65%</span>
+            <!-- DARK MODE TOGGLE -->
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--input-bg); border-radius: var(--radius-md); border: 1px solid var(--glass-border); margin-bottom: 16px;">
+                <span style="font-weight: 600; font-size: 15px;">Dark Mode</span>
+                <input type="checkbox" id="darkModeToggle" class="custom-checkbox" onchange="toggleDarkMode()">
+            </div>
+
+            <!-- NAV OPACITY SLIDER -->
+            <div style="padding: 14px 16px; background: var(--input-bg); border-radius: var(--radius-md); border: 1px solid var(--glass-border); margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-weight: 600; font-size: 14px;">Glass Unschärfe / Transparenz</span>
+                    <span id="opacityValText" style="font-weight: 700; color: var(--primary);">70%</span>
                 </div>
-                <input type="range" id="navOpacitySlider" min="0" max="100" value="65" oninput="updateNavOpacity(this.value)">
+                <input type="range" id="navOpacitySlider" min="20" max="95" value="70" style="width: 100%;" oninput="updateNavOpacity(this.value)">
             </div>
 
-            <h3 style="font-size: 11pt; margin-bottom: 10px; color: var(--text-muted); text-transform: uppercase;">Fließende Hintergründe</h3>
-            <div class="design-grid">
-                <button class="bg-preview-btn bg-1 active" onclick="setTheme(1)" title="Classic Blue"></button>
-                <button class="bg-preview-btn bg-2" onclick="setTheme(2)" title="Apple Mesh"></button>
-                <button class="bg-preview-btn bg-3" onclick="setTheme(3)" title="Ocean Waves"></button>
-                <button class="bg-preview-btn bg-4" onclick="setTheme(4)" title="Sunset"></button>
-                <button class="bg-preview-btn bg-5" onclick="setTheme(5)" title="Midnight"></button>
-                <button class="bg-preview-btn bg-6" onclick="setTheme(6)" title="Aurora"></button>
-                <button class="bg-preview-btn bg-7" onclick="setTheme(7)" title="Cotton Candy"></button>
-                <button class="bg-preview-btn bg-8" onclick="setTheme(8)" title="Lava"></button>
-                <button class="bg-preview-btn bg-9" onclick="setTheme(9)" title="Cyberpunk"></button>
-                <button class="bg-preview-btn bg-10" onclick="setTheme(10)" title="Dark Mono"></button>
+            <label>Fluid Liquid Ambient Themes</label>
+            <div class="theme-grid">
+                <div class="theme-btn active" style="background: linear-gradient(135deg, #007aff, #5856d6, #ff2d55);" onclick="setTheme(1, this)"></div>
+                <div class="theme-btn" style="background: linear-gradient(135deg, #34c759, #30cfd0, #330867);" onclick="setTheme(2, this)"></div>
+                <div class="theme-btn" style="background: linear-gradient(135deg, #ff9a9e, #fecfef, #fda085);" onclick="setTheme(3, this)"></div>
+                <div class="theme-btn" style="background: linear-gradient(135deg, #13547a, #80d0c7, #007aff);" onclick="setTheme(4, this)"></div>
+                <div class="theme-btn" style="background: linear-gradient(135deg, #fa709a, #fee140, #ff5e62);" onclick="setTheme(5, this)"></div>
+                <div class="theme-btn" style="background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);" onclick="setTheme(6, this)"></div>
             </div>
         </div>
     </div>
+
 </div>
 
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-    <button class="nav-item" id="tab-new" onclick="switchTab('new')" title="Neu">
-        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-        <span>Neu</span>
-    </button>
-    <button class="nav-item" id="tab-lists" onclick="switchTab('lists')" title="Listen">
-        <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
-        <span>Listen</span>
-    </button>
-    <button class="nav-item active" id="tab-active" onclick="switchTab('active')" title="Aktuell">
-        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        <span>Aktuell</span>
-    </button>
-    <button class="nav-item" id="tab-backup" onclick="switchTab('backup')" title="Backup">
-        <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
-        <span>Backup</span>
-    </button>
-    <button class="nav-item" id="tab-design" onclick="switchTab('design')" title="Design">
-        <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-        <span>Design</span>
-    </button>
-</nav>
+<!-- FLOATING BOTTOM NAV BAR -->
+<div class="bottom-nav-wrapper">
+    <nav class="bottom-nav">
+        <div class="nav-slider" id="navSlider"></div>
+        <button class="nav-item active" id="tab-active" onclick="switchTab('active')">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            <span>Aktuell</span>
+        </button>
+        <button class="nav-item" id="tab-lists" onclick="switchTab('lists')">
+            <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+            <span>Listen</span>
+        </button>
+        <button class="nav-item" id="tab-new" onclick="switchTab('new')">
+            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <span>Neu</span>
+        </button>
+        <button class="nav-item" id="tab-backup" onclick="switchTab('backup')">
+            <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+            <span>Backup</span>
+        </button>
+    </nav>
+</div>
 
 <script>
-    let packlisten = JSON.parse(localStorage.getItem('packlisten_data')) || [];
-    let activeListId = null;
-
-    let currentTheme = localStorage.getItem('bg_theme') || '1';
+    /* --- APP STATE --- */
+    let packlisten = JSON.parse(localStorage.getItem('packlisten_v2')) || [];
+    let activeListId = localStorage.getItem('active_list_id') || null;
+    let currentFilter = 'all';
     let isDarkMode = localStorage.getItem('dark_mode') === 'true';
-    let navOpacity = localStorage.getItem('nav_opacity');
+    let navOpacity = localStorage.getItem('nav_opacity') || '70';
+    let currentTheme = parseInt(localStorage.getItem('theme_id')) || 1;
 
-    const newListForm = document.getElementById('newListForm');
-    const savedListsContainer = document.getElementById('savedListsContainer');
+    /* --- PRESETS FOR PACKING LISTS --- */
+    const PRESETS = {
+        beach: [
+            { name: 'Badehose / Bikini', category: 'Kleidung' },
+            { name: 'Sonnenbrille & Sonnencreme', category: 'Hygiene' },
+            { name: 'Strandhandtuch', category: 'Sonstiges' },
+            { name: 'Flip-Flops', category: 'Kleidung' },
+            { name: 'Powerbank & Ladekabel', category: 'Elektronik' }
+        ],
+        city: [
+            { name: 'Bequeme Laufschuhe', category: 'Kleidung' },
+            { name: 'Reisepass / Personalausweis', category: 'Dokumente' },
+            { name: 'Kopfhörer', category: 'Elektronik' },
+            { name: 'Kulturbeutel', category: 'Hygiene' },
+            { name: 'Regenschirm', category: 'Sonstiges' }
+        ],
+        camping: [
+            { name: 'Zelt & Schlafsack', category: 'Sonstiges' },
+            { name: 'Taschenlampe / Stirnlampe', category: 'Elektronik' },
+            { name: 'Erste-Hilfe-Set', category: 'Hygiene' },
+            { name: 'Outdoor-Bekleidung', category: 'Kleidung' },
+            { name: 'Taschenmesser', category: 'Sonstiges' }
+        ],
+        business: [
+            { name: 'Hemden / Blusen', category: 'Kleidung' },
+            { name: 'Laptop & Ladekabel', category: 'Elektronik' },
+            { name: 'Visitenkarten', category: 'Dokumente' },
+            { name: 'Sacko / Blazer', category: 'Kleidung' }
+        ]
+    };
+
+    /* --- DOM ELEMENTS --- */
     const activeListContent = document.getElementById('activeListContent');
     const noSelectionNotice = document.getElementById('noSelectionNotice');
-    
-    const activeTitle = document.getElementById('activeTitle');
-    const activeDate = document.getElementById('activeDate');
-    const activePurpose = document.getElementById('activePurpose');
-    const activeNotes = document.getElementById('activeNotes');
-    
-    const addItemForm = document.getElementById('addItemForm');
-    const newItemName = document.getElementById('newItemName');
-    const itemsListContainer = document.getElementById('itemsListContainer');
+    const itemsContainer = document.getElementById('itemsContainer');
     const itemsEmptyState = document.getElementById('itemsEmptyState');
 
+    /* --- INITIALIZATION --- */
+    function init() {
+        applySettings();
+        if (packlisten.length > 0) {
+            if (!activeListId || !packlisten.some(l => l.id === activeListId)) {
+                activeListId = packlisten[0].id;
+            }
+            selectList(activeListId, false);
+        } else {
+            showEmptyState();
+        }
+        updateNavSlider(document.getElementById('tab-active'));
+        startFluidCanvas();
+    }
+
+    /* --- NAVIGATION TAB SWITCHING --- */
     function switchTab(tabName) {
-        document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-        
-        document.getElementById('view-' + tabName).classList.add('active');
-        document.getElementById('tab-' + tabName).classList.add('active');
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+        const targetView = document.getElementById('view-' + tabName);
+        const targetTab = document.getElementById('tab-' + tabName);
+
+        if (targetView) targetView.classList.add('active');
+        if (targetTab) {
+            targetTab.classList.add('active');
+            updateNavSlider(targetTab);
+        }
+
+        if (tabName === 'lists') renderLists();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function init() {
-        // Initiale Slider-Werte setzen
-        if (navOpacity === null) { navOpacity = isDarkMode ? 75 : 65; }
-        document.getElementById('navOpacitySlider').value = navOpacity;
-        updateNavOpacity(navOpacity, false);
-
-        applyDesignSettings();
-        
-        if (packlisten.length > 0) {
-            selectList(packlisten[0].id, false); 
-            switchTab('active');
-        } else {
-            switchTab('new');
-            showEmptyState();
+    function updateNavSlider(tabElem) {
+        const slider = document.getElementById('navSlider');
+        if (tabElem && slider) {
+            slider.style.width = tabElem.offsetWidth + 'px';
+            slider.style.transform = `translateX(${tabElem.offsetLeft - 6}px)`;
         }
     }
 
-    // --- DESIGN & THEMES LOGIK ---
-    function applyDesignSettings() {
-        document.body.className = `bg-${currentTheme}`;
-        if (isDarkMode) document.body.classList.add('dark-mode');
-        else document.body.classList.remove('dark-mode');
-        
-        document.getElementById('darkModeToggle').checked = isDarkMode;
-        
-        document.querySelectorAll('.bg-preview-btn').forEach(btn => btn.classList.remove('active'));
-        const activeBtn = document.querySelector(`.bg-preview-btn.bg-${currentTheme}`);
-        if(activeBtn) activeBtn.classList.add('active');
+    /* --- DATA RENDER & MANIPULATION --- */
+    function saveData() {
+        localStorage.setItem('packlisten_v2', JSON.stringify(packlisten));
+        if (activeListId) localStorage.setItem('active_list_id', activeListId);
     }
 
-    function setTheme(themeNumber) {
-        currentTheme = themeNumber;
-        localStorage.setItem('bg_theme', themeNumber);
-        applyDesignSettings();
+    function selectList(id, autoSwitch = true) {
+        activeListId = id;
+        saveData();
+        const list = packlisten.find(l => l.id === id);
+        if (!list) { showEmptyState(); return; }
+
+        noSelectionNotice.style.display = 'none';
+        activeListContent.style.display = 'block';
+
+        document.getElementById('activeTitle').textContent = list.name;
+        document.getElementById('activeSubtitle').textContent = `${formatDate(list.date)} • ${list.purpose || 'Allgemein'}`;
+        document.getElementById('activeNotes').value = list.notes || '';
+
+        renderItems(list);
+        if (autoSwitch) switchTab('active');
+    }
+
+    function showEmptyState() {
+        activeListId = null;
+        noSelectionNotice.style.display = 'block';
+        activeListContent.style.display = 'none';
+    }
+
+    function renderItems(list) {
+        itemsContainer.innerHTML = '';
+        if (!list.items) list.items = [];
+
+        // Progress calculate
+        const total = list.items.length;
+        const packedCount = list.items.filter(i => i.packed).length;
+        const percent = total === 0 ? 0 : Math.round((packedCount / total) * 100);
+
+        document.getElementById('progressBarFill').style.width = percent + '%';
+        document.getElementById('progressPercent').textContent = percent + '%';
+
+        // Filter items
+        let filtered = list.items.filter(item => {
+            if (currentFilter === 'open') return !item.packed;
+            if (currentFilter === 'packed') return item.packed;
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            itemsEmptyState.style.display = 'block';
+            return;
+        }
+        itemsEmptyState.style.display = 'none';
+
+        // Group by Categories
+        const categories = ['Kleidung', 'Elektronik', 'Hygiene', 'Dokumente', 'Sonstiges'];
+        categories.forEach(cat => {
+            const catItems = filtered.filter(i => (i.category || 'Sonstiges') === cat);
+            if (catItems.length > 0) {
+                const catHeader = document.createElement('div');
+                catHeader.className = 'category-title';
+                catHeader.textContent = cat;
+                itemsContainer.appendChild(catHeader);
+
+                const ul = document.createElement('ul');
+                ul.className = 'items-list';
+
+                catItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = `item-row ${item.packed ? 'packed' : ''}`;
+                    li.innerHTML = `
+                        <div class="item-left">
+                            <input type="checkbox" class="custom-checkbox" ${item.packed ? 'checked' : ''}>
+                            <span class="item-text">${escapeHTML(item.name)}</span>
+                        </div>
+                        <button class="btn-icon" title="Löschen">✕</button>
+                    `;
+
+                    const checkbox = li.querySelector('.custom-checkbox');
+                    checkbox.addEventListener('change', () => togglePacked(list.id, item.id));
+                    li.querySelector('.item-left').addEventListener('click', (e) => {
+                        if (e.target !== checkbox) {
+                            checkbox.checked = !checkbox.checked;
+                            togglePacked(list.id, item.id);
+                        }
+                    });
+                    li.querySelector('.btn-icon').addEventListener('click', () => deleteItem(list.id, item.id));
+
+                    ul.appendChild(li);
+                });
+                itemsContainer.appendChild(ul);
+            }
+        });
+    }
+
+    function togglePacked(listId, itemId) {
+        const list = packlisten.find(l => l.id === listId);
+        if (list) {
+            const item = list.items.find(i => i.id === itemId);
+            if (item) {
+                item.packed = !item.packed;
+                saveData();
+                renderItems(list);
+            }
+        }
+    }
+
+    function deleteItem(listId, itemId) {
+        const list = packlisten.find(l => l.id === listId);
+        if (list) {
+            list.items = list.items.filter(i => i.id !== itemId);
+            saveData();
+            renderItems(list);
+        }
+    }
+
+    /* --- ADD ITEM FORM --- */
+    document.getElementById('addItemForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!activeListId) return;
+        const list = packlisten.find(l => l.id === activeListId);
+        const nameInput = document.getElementById('newItemName');
+        const catInput = document.getElementById('newItemCategory');
+
+        if (list && nameInput.value.trim()) {
+            list.items.push({
+                id: 'item-' + Date.now(),
+                name: nameInput.value.trim(),
+                category: catInput.value,
+                packed: false
+            });
+            saveData();
+            nameInput.value = '';
+            renderItems(list);
+        }
+    });
+
+    /* --- ADD LIST FORM --- */
+    document.getElementById('newListForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('listName').value.trim();
+        const date = document.getElementById('listDate').value;
+        const purpose = document.getElementById('listPurpose').value.trim();
+        const presetKey = document.getElementById('listPreset').value;
+
+        const newId = 'list-' + Date.now();
+        let defaultItems = [];
+
+        if (presetKey !== 'none' && PRESETS[presetKey]) {
+            defaultItems = PRESETS[presetKey].map((item, idx) => ({
+                id: `item-${Date.now()}-${idx}`,
+                name: item.name,
+                category: item.category,
+                packed: false
+            }));
+        }
+
+        const newList = {
+            id: newId,
+            name: name,
+            date: date,
+            purpose: purpose,
+            notes: '',
+            items: defaultItems
+        };
+
+        packlisten.push(newList);
+        saveData();
+        document.getElementById('newListForm').reset();
+        selectList(newId, true);
+    });
+
+    /* --- RENDER SAVED LISTS --- */
+    function renderLists() {
+        const container = document.getElementById('savedListsContainer');
+        container.innerHTML = '';
+        if (packlisten.length === 0) {
+            container.innerHTML = '<div class="empty-state">Noch keine Packlisten vorhanden.</div>';
+            return;
+        }
+
+        packlisten.forEach(list => {
+            const div = document.createElement('div');
+            div.className = `list-card-item ${list.id === activeListId ? 'active-list' : ''}`;
+            div.innerHTML = `
+                <div>
+                    <div class="list-title">${escapeHTML(list.name)}</div>
+                    <div class="list-meta">${formatDate(list.date)} • ${escapeHTML(list.purpose || 'Allgemein')} (${list.items ? list.items.length : 0} Items)</div>
+                </div>
+                <button class="btn-icon" title="Löschen" style="color: inherit;">✕</button>
+            `;
+            div.addEventListener('click', (e) => {
+                if (!e.target.closest('.btn-icon')) selectList(list.id, true);
+            });
+            div.querySelector('.btn-icon').addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteList(list.id);
+            });
+            container.appendChild(div);
+        });
+    }
+
+    function deleteList(id) {
+        if (confirm('Packliste unwiderruflich löschen?')) {
+            packlisten = packlisten.filter(l => l.id !== id);
+            saveData();
+            if (activeListId === id) {
+                if (packlisten.length > 0) selectList(packlisten[0].id, false);
+                else showEmptyState();
+            }
+            renderLists();
+        }
+    }
+
+    /* --- NOTES SYNC --- */
+    document.getElementById('activeNotes').addEventListener('input', (e) => {
+        if (!activeListId) return;
+        const list = packlisten.find(l => l.id === activeListId);
+        if (list) {
+            list.notes = e.target.value;
+            saveData();
+        }
+    });
+
+    /* --- QUICK FILTER CHIPS --- */
+    function setFilter(type, chipElem) {
+        currentFilter = type;
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chipElem.classList.add('active');
+        if (activeListId) {
+            const list = packlisten.find(l => l.id === activeListId);
+            if (list) renderItems(list);
+        }
+    }
+
+    /* --- BACKUP EXPORT & IMPORT --- */
+    function exportData() {
+        if (packlisten.length === 0) {
+            alert('Keine Daten zum Exportieren vorhanden.');
+            return;
+        }
+        const str = JSON.stringify(packlisten, null, 2);
+        const blob = new Blob([str], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `packlisten_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+    }
+
+    function importData(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const data = JSON.parse(evt.target.result);
+                if (Array.isArray(data)) {
+                    packlisten = data;
+                    saveData();
+                    init();
+                    switchTab('lists');
+                    alert('Daten erfolgreich importiert!');
+                }
+            } catch (err) {
+                alert('Ungültiges Format.');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    /* --- THEMES & DESIGN --- */
+    function applySettings() {
+        if (isDarkMode) document.body.classList.add('dark-mode');
+        else document.body.classList.remove('dark-mode');
+        document.getElementById('darkModeToggle').checked = isDarkMode;
+
+        document.documentElement.style.setProperty('--nav-opacity', navOpacity / 100);
+        document.getElementById('opacityValText').textContent = navOpacity + '%';
+        document.getElementById('navOpacitySlider').value = navOpacity;
     }
 
     function toggleDarkMode() {
         isDarkMode = document.getElementById('darkModeToggle').checked;
         localStorage.setItem('dark_mode', isDarkMode);
-        
-        // Passenden Default-Transparenz-Wert laden, falls Slider nicht manuell gezogen wurde
-        if (isDarkMode) {
-            navOpacity = localStorage.getItem('nav_opacity') || 75;
-        } else {
-            navOpacity = localStorage.getItem('nav_opacity') || 65;
-        }
-        document.getElementById('navOpacitySlider').value = navOpacity;
-        updateNavOpacity(navOpacity, false);
-        
-        applyDesignSettings();
+        applySettings();
     }
 
-    function updateNavOpacity(value, save = true) {
-        document.documentElement.style.setProperty('--nav-opacity', value / 100);
-        document.getElementById('opacityValueText').innerText = value + '%';
-        if(save) { localStorage.setItem('nav_opacity', value); }
+    function updateNavOpacity(val) {
+        navOpacity = val;
+        localStorage.setItem('nav_opacity', val);
+        applySettings();
     }
 
-    // --- DATEN LOGIK ---
-    function saveData() { localStorage.setItem('packlisten_data', JSON.stringify(packlisten)); }
-    function formatDate(dateStr) {
-        if (!dateStr) return '-'; const parts = dateStr.split('-');
-        if (parts.length !== 3) return dateStr; return `${parts[2]}.${parts[1]}.${parts[0]}`;
+    function setTheme(id, btnElem) {
+        currentTheme = id;
+        localStorage.setItem('theme_id', id);
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        if (btnElem) btnElem.classList.add('active');
     }
 
-    function renderLists() {
-        savedListsContainer.innerHTML = '';
-        if (packlisten.length === 0) {
-            savedListsContainer.innerHTML = '<div class="empty-state">Keine Listen vorhanden. Erstelle eine Neue!</div>';
-            return;
-        }
-        packlisten.forEach(list => {
-            const div = document.createElement('div');
-            div.className = `list-selector-item ${list.id === activeListId ? 'is-active-list' : ''}`;
-            div.addEventListener('click', (e) => {
-                if (e.target.closest('.btn-delete-small')) return; selectList(list.id, true);
-            });
-            div.innerHTML = `
-                <div class="info">
-                    <div class="title">${escapeHTML(list.name)}</div>
-                    <div class="meta">${formatDate(list.date)} | ${escapeHTML(list.purpose)}</div>
-                </div>
-                <button type="button" class="btn-delete-small" title="Löschen">✕</button>
-            `;
-            div.querySelector('.btn-delete-small').addEventListener('click', (e) => { e.stopPropagation(); deleteList(list.id); });
-            savedListsContainer.appendChild(div);
-        });
-    }
-
-    function selectList(id, autoSwitchTab = false) {
-        activeListId = id; const list = packlisten.find(l => l.id === id);
-        if (!list) { showEmptyState(); return; }
-        noSelectionNotice.style.display = 'none'; activeListContent.style.display = 'block';
-        activeTitle.textContent = list.name; activeDate.textContent = formatDate(list.date);
-        activePurpose.textContent = list.purpose; activeNotes.value = list.notes || '';
-        renderItems(list); renderLists(); 
-        if(autoSwitchTab) switchTab('active');
-    }
-
-    function showEmptyState() {
-        activeListId = null; noSelectionNotice.style.display = 'block';
-        activeListContent.style.display = 'none'; renderLists();
-    }
-
-    function renderItems(list) {
-        itemsListContainer.innerHTML = '';
-        if (!list.items || list.items.length === 0) { itemsEmptyState.style.display = 'block'; return; }
-        itemsEmptyState.style.display = 'none';
-        list.items.forEach(item => {
-            const li = document.createElement('li');
-            li.className = `item-row ${item.packed ? 'packed' : ''}`;
-            li.innerHTML = `
-                <div class="item-left">
-                    <input type="checkbox" ${item.packed ? 'checked' : ''}>
-                    <span class="item-text">${escapeHTML(item.name)}</span>
-                </div>
-                <button type="button" class="btn-delete-small" title="Gegenstand entfernen">✕</button>
-            `;
-            const checkbox = li.querySelector('input[type="checkbox"]');
-            checkbox.addEventListener('change', () => toggleItemPacked(list.id, item.id));
-            li.querySelector('.item-left').addEventListener('click', (e) => {
-                if (e.target !== checkbox) { checkbox.checked = !checkbox.checked; toggleItemPacked(list.id, item.id); }
-            });
-            li.querySelector('.btn-delete-small').addEventListener('click', () => deleteItem(list.id, item.id));
-            itemsListContainer.appendChild(li);
-        });
-    }
-
-    newListForm.addEventListener('submit', (e) => {
-        e.preventDefault(); const id = 'list-' + Date.now();
-        const newList = { id: id, name: document.getElementById('listName').value, date: document.getElementById('listDate').value, purpose: document.getElementById('listPurpose').value, notes: '', items: [] };
-        packlisten.push(newList); saveData(); newListForm.reset(); selectList(id, true);
-    });
-
-    function deleteList(id) {
-        if (confirm('Packliste wirklich löschen?')) {
-            packlisten = packlisten.filter(l => l.id !== id); saveData();
-            if (activeListId === id) {
-                if (packlisten.length > 0) { selectList(packlisten[0].id, false); } else { showEmptyState(); }
-            } else { renderLists(); }
-        }
-    }
-
-    addItemForm.addEventListener('submit', (e) => {
-        e.preventDefault(); if (!activeListId) return;
-        const list = packlisten.find(l => l.id === activeListId);
-        if (list) {
-            const newItem = { id: 'item-' + Date.now(), name: newItemName.value, packed: false };
-            if (!list.items) list.items = [];
-            list.items.push(newItem); saveData(); newItemName.value = ''; renderItems(list);
-        }
-    });
-
-    function toggleItemPacked(listId, itemId) {
-        const list = packlisten.find(l => l.id === listId);
-        if (list && list.items) { const item = list.items.find(i => i.id === itemId); if (item) { item.packed = !item.packed; saveData(); renderItems(list); } }
-    }
-
-    function deleteItem(listId, itemId) {
-        const list = packlisten.find(l => l.id === listId);
-        if (list && list.items) { list.items = list.items.filter(i => i.id !== itemId); saveData(); renderItems(list); }
-    }
-
-    activeNotes.addEventListener('input', () => {
-        if (!activeListId) return;
-        const list = packlisten.find(l => l.id === activeListId); if (list) { list.notes = activeNotes.value; saveData(); }
-    });
-
-    function exportData() {
-        if (packlisten.length === 0) return;
-        const dataStr = JSON.stringify(packlisten);
-        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-        const linkElement = document.createElement('a'); linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', 'meine_packlisten.json'); document.body.appendChild(linkElement);
-        linkElement.click(); document.body.removeChild(linkElement);
-    }
-
-    function importData(event) {
-        const file = event.target.files[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try { const importedData = JSON.parse(e.target.result);
-                if (Array.isArray(importedData)) { packlisten = importedData; saveData(); init(); switchTab('lists'); }
-            } catch (err) { alert('Fehler beim Laden.'); }
-        };
-        reader.readAsText(file);
+    /* --- HELPER --- */
+    function formatDate(str) {
+        if (!str) return '-';
+        const parts = str.split('-');
+        return parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : str;
     }
 
     function escapeHTML(str) {
         return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
     }
 
-    init();
+    /* --- DYNAMISCHER FLUID CANVAS MIT CURSOR-FOLLOWING METABALLS --- */
+    function startFluidCanvas() {
+        const canvas = document.getElementById('fluid-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Mouse/Touch Pointer State
+        const pointer = { x: width / 2, y: height / 2, targetX: width / 2, targetY: height / 2 };
+
+        window.addEventListener('mousemove', (e) => {
+            pointer.targetX = e.clientX;
+            pointer.targetY = e.clientY;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                pointer.targetX = e.touches[0].clientX;
+                pointer.targetY = e.touches[0].clientY;
+            }
+        });
+
+        // Dynamic Blobs Array
+        const blobs = [
+            { x: width * 0.2, y: height * 0.3, vx: 0.8, vy: 0.6, radius: 260, color: 'rgba(0, 122, 255, 0.45)' },
+            { x: width * 0.8, y: height * 0.7, vx: -0.6, vy: -0.5, radius: 300, color: 'rgba(88, 86, 214, 0.45)' },
+            { x: width * 0.5, y: height * 0.5, vx: 0.4, vy: -0.7, radius: 240, color: 'rgba(255, 45, 85, 0.35)' },
+            { x: 0, y: 0, vx: 0, vy: 0, radius: 220, isCursor: true, color: 'rgba(52, 199, 89, 0.4)' }
+        ];
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Interpolate Cursor Blob with Spring Physics
+            pointer.x += (pointer.targetX - pointer.x) * 0.08;
+            pointer.y += (pointer.targetY - pointer.y) * 0.08;
+
+            blobs.forEach(b => {
+                if (b.isCursor) {
+                    b.x = pointer.x;
+                    b.y = pointer.y;
+                } else {
+                    b.x += b.vx;
+                    b.y += b.vy;
+
+                    if (b.x < -100 || b.x > width + 100) b.vx *= -1;
+                    if (b.y < -100 || b.y > height + 100) b.vy *= -1;
+                }
+
+                // Render Radial Gradients
+                const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius);
+                grad.addColorStop(0, b.color);
+                grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
