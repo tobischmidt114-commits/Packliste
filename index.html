@@ -37,6 +37,8 @@
             --theme-color-1: #007aff;
             --theme-color-2: #5856d6;
             --theme-color-3: #ff2d55;
+            
+            --app-bg: #0f1015;
         }
 
         /* Dark Mode Override (iOS Dark Glass) */
@@ -72,11 +74,11 @@
             color: var(--text-main);
             min-height: 100dvh;
             overflow-x: hidden;
-            background-color: #0f1015;
+            background-color: var(--app-bg);
             line-height: 1.5;
             padding-bottom: calc(110px + env(safe-area-inset-bottom));
             -webkit-font-smoothing: antialiased;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, background-color 0.3s ease;
         }
 
         /* --- DYNAMISCHER BACKGROUND CANVAS --- */
@@ -281,7 +283,7 @@
             box-shadow: 0 6px 20px rgba(52, 199, 89, 0.3);
         }
 
-        /* --- PROGRESSED PACKING HEADER --- */
+        /* --- PROGRESS BAR --- */
         .progress-box {
             margin-bottom: 20px;
         }
@@ -486,7 +488,7 @@
             border-color: var(--primary);
         }
 
-        /* --- FLOATING BOTTOM NAV BAR (iOS Glass Pill) --- */
+        /* --- FLOATING BOTTOM NAV BAR --- */
         .bottom-nav-wrapper {
             position: fixed;
             bottom: max(20px, env(safe-area-inset-bottom));
@@ -603,6 +605,7 @@
             border-radius: var(--radius-md);
             border: 1px solid var(--glass-border);
             justify-content: space-around;
+            align-items: center;
         }
 
         .color-picker-wrapper {
@@ -837,6 +840,24 @@
                 <input type="checkbox" id="darkModeToggle" class="custom-checkbox" onchange="toggleDarkMode()">
             </div>
 
+            <!-- HINTERGRUND-MODUS & FARBE -->
+            <label>Hintergrund-Farbe & Modus</label>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
+                <button type="button" class="btn btn-secondary" onclick="setAppBackground('#000000')" style="font-size: 13px; padding: 10px;">Schwarz</button>
+                <button type="button" class="btn btn-secondary" onclick="setAppBackground('#ffffff')" style="font-size: 13px; padding: 10px;">Weiß</button>
+                <button type="button" class="btn btn-secondary" onclick="setAppBackground('#0f1015')" style="font-size: 13px; padding: 10px;">Dunkel</button>
+            </div>
+            <div class="color-picker-container" style="margin-bottom: 16px;">
+                <div class="color-picker-wrapper">
+                    <span>Eigene Hintergrundfarbe</span>
+                    <input type="color" id="colorAppBg" class="color-picker" value="#0f1015">
+                </div>
+                <div class="color-picker-wrapper">
+                    <span>Hintergrund-Effekt (Fluid)</span>
+                    <input type="checkbox" id="canvasToggle" class="custom-checkbox" checked onchange="toggleCanvas()">
+                </div>
+            </div>
+
             <!-- NAV OPACITY SLIDER -->
             <div style="padding: 14px 16px; background: var(--input-bg); border-radius: var(--radius-md); border: 1px solid var(--glass-border); margin-bottom: 20px;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
@@ -926,8 +947,9 @@
     let navOpacity = localStorage.getItem('nav_opacity') || '70';
     let currentTheme = parseInt(localStorage.getItem('theme_id')) || 1;
     let primaryColor = localStorage.getItem('primary_color') || '#007aff';
+    let appBgColor = localStorage.getItem('app_bg_color') || '#0f1015';
+    let canvasEnabled = localStorage.getItem('canvas_enabled') !== 'false';
     
-    // Globale Farb-State für die Fluid Blobs
     let blobColors = JSON.parse(localStorage.getItem('blob_colors')) || ['#007aff', '#5856d6', '#ff2d55', '#34c759'];
 
     /* --- PRESETS FOR PACKING LISTS --- */
@@ -1042,7 +1064,6 @@
         itemsContainer.innerHTML = '';
         if (!list.items) list.items = [];
 
-        // Progress calculate
         const total = list.items.length;
         const packedCount = list.items.filter(i => i.packed).length;
         const percent = total === 0 ? 0 : Math.round((packedCount / total) * 100);
@@ -1050,7 +1071,6 @@
         document.getElementById('progressBarFill').style.width = percent + '%';
         document.getElementById('progressPercent').textContent = percent + '%';
 
-        // Filter items
         let filtered = list.items.filter(item => {
             if (currentFilter === 'open') return !item.packed;
             if (currentFilter === 'packed') return item.packed;
@@ -1063,7 +1083,6 @@
         }
         itemsEmptyState.style.display = 'none';
 
-        // Group by Categories
         const categories = ['Kleidung', 'Elektronik', 'Hygiene', 'Dokumente', 'Sonstiges'];
         categories.forEach(cat => {
             const catItems = filtered.filter(i => (i.category || 'Sonstiges') === cat);
@@ -1289,11 +1308,15 @@
         document.getElementById('opacityValText').textContent = navOpacity + '%';
         document.getElementById('navOpacitySlider').value = navOpacity;
         
-        // App Primary Color setzen
         updatePrimaryCss(primaryColor);
         document.getElementById('colorPrimary').value = primaryColor;
 
-        // Color Picker Werte für Blobs setzen
+        setAppBackground(appBgColor, false);
+        document.getElementById('colorAppBg').value = appBgColor;
+
+        document.getElementById('canvasToggle').checked = canvasEnabled;
+        document.getElementById('fluid-canvas').style.display = canvasEnabled ? 'block' : 'none';
+
         document.getElementById('colorBlob0').value = blobColors[0];
         document.getElementById('colorBlob1').value = blobColors[1];
         document.getElementById('colorBlob2').value = blobColors[2];
@@ -1303,6 +1326,20 @@
     function updatePrimaryCss(val) {
         document.documentElement.style.setProperty('--primary', val);
         document.documentElement.style.setProperty('--primary-glow', hexToRgba(val, 0.35));
+    }
+
+    function setAppBackground(color, save = true) {
+        appBgColor = color;
+        if (save) localStorage.setItem('app_bg_color', color);
+        document.documentElement.style.setProperty('--app-bg', color);
+        const picker = document.getElementById('colorAppBg');
+        if (picker) picker.value = color;
+    }
+
+    function toggleCanvas() {
+        canvasEnabled = document.getElementById('canvasToggle').checked;
+        localStorage.setItem('canvas_enabled', canvasEnabled);
+        document.getElementById('fluid-canvas').style.display = canvasEnabled ? 'block' : 'none';
     }
 
     function toggleDarkMode() {
@@ -1324,11 +1361,8 @@
         if (colorArray) {
             blobColors = colorArray;
             localStorage.setItem('blob_colors', JSON.stringify(blobColors));
-            
-            // Setze auch die Hauptfarbe passend zum Theme
             primaryColor = colorArray[0];
             localStorage.setItem('primary_color', primaryColor);
-            
             applySettings();
         }
         
@@ -1336,16 +1370,17 @@
         if (btnElem) btnElem.classList.add('active');
     }
     
-    // Live-Update der Color Picker für Hauptfarbe & Blobs
     function setupColorPickers() {
-        // Picker für die App-Hauptfarbe
         document.getElementById('colorPrimary').addEventListener('input', (e) => {
             primaryColor = e.target.value;
             localStorage.setItem('primary_color', primaryColor);
             updatePrimaryCss(primaryColor);
         });
 
-        // Picker für die Fluid Canvas Blobs
+        document.getElementById('colorAppBg').addEventListener('input', (e) => {
+            setAppBackground(e.target.value);
+        });
+
         for (let i = 0; i < 4; i++) {
             document.getElementById(`colorBlob${i}`).addEventListener('input', (e) => {
                 blobColors[i] = e.target.value;
@@ -1365,7 +1400,6 @@
         return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
     }
     
-    // Konvertiert Hex-Farbe (#ff0000) in RGBA mit gewünschter Transparenz
     function hexToRgba(hex, alpha) {
         let r = parseInt(hex.slice(1, 3), 16),
             g = parseInt(hex.slice(3, 5), 16),
@@ -1386,7 +1420,6 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // Mouse/Touch Pointer State
         const pointer = { x: width / 2, y: height / 2, targetX: width / 2, targetY: height / 2 };
 
         window.addEventListener('mousemove', (e) => {
@@ -1401,7 +1434,6 @@
             }
         });
 
-        // Dynamic Blobs Array greift auf die Indizes für blobColors zurück
         const blobs = [
             { x: width * 0.2, y: height * 0.3, vx: 0.8, vy: 0.6, radius: 260, colorIdx: 0, alpha: 0.45 },
             { x: width * 0.8, y: height * 0.7, vx: -0.6, vy: -0.5, radius: 300, colorIdx: 1, alpha: 0.45 },
@@ -1412,7 +1444,6 @@
         function animate() {
             ctx.clearRect(0, 0, width, height);
 
-            // Interpolate Cursor Blob with Spring Physics
             pointer.x += (pointer.targetX - pointer.x) * 0.08;
             pointer.y += (pointer.targetY - pointer.y) * 0.08;
 
@@ -1428,10 +1459,8 @@
                     if (b.y < -100 || b.y > height + 100) b.vy *= -1;
                 }
 
-                // Ziehe die aktuelle Farbe aus dem globalen Array und rechne sie in RGBA um
                 const currentColor = hexToRgba(blobColors[b.colorIdx], b.alpha);
 
-                // Render Radial Gradients
                 const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius);
                 grad.addColorStop(0, currentColor);
                 grad.addColorStop(1, 'rgba(0,0,0,0)');
