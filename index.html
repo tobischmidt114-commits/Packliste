@@ -13,11 +13,11 @@
     <style>
         :root {
             /* Apple Liquid Glass Palette (Light Mode) */
-            --glass-bg: rgba(255, 255, 255, 0.42);
-            --glass-card: rgba(255, 255, 255, 0.55);
+            --glass-bg: rgba(255, 255, 255, 0.35);
+            --glass-card: rgba(255, 255, 255, 0.45);
             --glass-border: rgba(255, 255, 255, 0.7);
             --glass-highlight: rgba(255, 255, 255, 0.9);
-            --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+            --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
             
             --nav-opacity: 0.7;
             --nav-bg: rgba(255, 255, 255, var(--nav-opacity));
@@ -25,16 +25,16 @@
             --nav-item-active-color: var(--primary);
             
             --text-main: #1c1c1e;
-            --text-muted: #6c6c70;
+            --text-muted: #48484a;
             --primary: #007aff;
-            --primary-glow: rgba(0, 122, 255, 0.35);
+            --primary-glow: rgba(0, 122, 255, 0.45);
             --danger: #ff3b30;
             --success: #34c759;
             --warning: #ff9500;
             
-            --input-bg: rgba(255, 255, 255, 0.6);
-            --input-border: rgba(211, 211, 218, 0.5);
-            --item-border: rgba(0, 0, 0, 0.05);
+            --input-bg: rgba(255, 255, 255, 0.55);
+            --input-border: rgba(211, 211, 218, 0.6);
+            --item-border: rgba(0, 0, 0, 0.08);
             --radius-xl: 28px;
             --radius-lg: 20px;
             --radius-md: 14px;
@@ -49,23 +49,23 @@
 
         /* Dark Mode Override (iOS Dark Glass) */
         body.dark-mode {
-            --glass-bg: rgba(22, 22, 26, 0.5);
-            --glass-card: rgba(32, 32, 38, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.14);
-            --glass-highlight: rgba(255, 255, 255, 0.25);
-            --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2);
+            --glass-bg: rgba(18, 18, 22, 0.45);
+            --glass-card: rgba(28, 28, 34, 0.52);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-highlight: rgba(255, 255, 255, 0.3);
+            --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
             
             --nav-bg: rgba(28, 28, 32, var(--nav-opacity));
             --nav-item-color: #8e8e93;
             --nav-item-active-color: var(--primary);
             
             --text-main: #f2f2f7;
-            --text-muted: #98989d;
-            --primary-glow: rgba(10, 132, 255, 0.45);
+            --text-muted: #aeaeb2;
+            --primary-glow: rgba(10, 132, 255, 0.55);
             
-            --input-bg: rgba(0, 0, 0, 0.35);
-            --input-border: rgba(255, 255, 255, 0.12);
-            --item-border: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --input-border: rgba(255, 255, 255, 0.18);
+            --item-border: rgba(255, 255, 255, 0.1);
         }
 
         * {
@@ -87,6 +87,7 @@
             transition: color 0.3s ease, background-color 0.3s ease;
         }
 
+        /* Canvas-Hintergrund intensiviert */
         #fluid-canvas {
             position: fixed;
             top: 0;
@@ -95,8 +96,8 @@
             height: 100vh;
             z-index: -1;
             pointer-events: none;
-            filter: blur(50px);
-            opacity: 0.85;
+            filter: blur(35px);
+            opacity: 0.95;
             transition: opacity 0.5s ease;
         }
 
@@ -391,7 +392,6 @@
                         <p id="activeSubtitle" style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">-</p>
                     </div>
                     <div>
-                        <!-- NEUER TEILEN BUTTON -->
                         <button class="btn-icon btn-print-hide" onclick="shareActiveList()" title="Liste mit Freunden teilen">👥</button>
                     </div>
                 </div>
@@ -451,6 +451,21 @@
                 <h2>Meine Cloud Packlisten</h2>
             </div>
             <div id="savedListsContainer"></div>
+        </div>
+
+        <!-- NEU: BACKUP & WIEDERHERSTELLUNG -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Backup & Wiederherstellung</h2>
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+                Exportiere deine Packlisten als Datei auf dein Gerät oder lade ein altes Backup hoch.
+            </p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="exportBackup()">📥 Backup erstellen</button>
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('importFileInput').click()">📤 Backup laden</button>
+                <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="importBackup(event)">
+            </div>
         </div>
     </div>
 
@@ -521,7 +536,8 @@
             <div class="color-picker-container" style="margin-bottom: 16px;">
                 <div class="color-picker-wrapper">
                     <span>Eigene Hintergrundfarbe</span>
-                    <input type="color" id="colorAppBg" class="color-picker" value="#0f1015">
+                    <!-- HEURISTISCHER FIX: oninput Event hinzugefügt -->
+                    <input type="color" id="colorAppBg" class="color-picker" value="#0f1015" oninput="setAppBackground(this.value)">
                 </div>
                 <div class="color-picker-wrapper">
                     <span>Hintergrund-Effekt (Fluid)</span>
@@ -576,7 +592,6 @@
     /* =========================================
        1. FIREBASE SETUP & KONFIGURATION
        ========================================= */
-    // WICHTIG: Füge HIER die Config-Daten aus deiner Firebase Console ein!
     const firebaseConfig = {
       apiKey: "AIzaSyAmdtIBrALgyN8qAGFdEW29QW8ZDR7lcuc",
       authDomain: "packliste-9ceec.firebaseapp.com",
@@ -599,7 +614,7 @@
     let packlisten = [];
     let activeListId = localStorage.getItem('active_list_id') || null;
     let currentFilter = 'all';
-    let dbUnsubscribe = null; // Stoppt den Echtzeit-Listener beim Logout
+    let dbUnsubscribe = null;
 
     // Design State
     let isDarkMode = localStorage.getItem('dark_mode') === 'true';
@@ -637,17 +652,13 @@
         const bottomNav = document.getElementById('bottom-nav-wrap');
         
         if (user) {
-            // EINGELOGGT
             document.getElementById('currentUserEmailText').textContent = user.email;
             appHeader.style.display = 'flex';
             bottomNav.style.display = 'block';
             
-            // Echtzeit-Datenbank Listener starten
             startDatabaseSync();
-            
-            switchTab('lists'); // Nach Login zur Listen-Übersicht
+            switchTab('lists');
         } else {
-            // AUSGELOGGT
             appHeader.style.display = 'none';
             bottomNav.style.display = 'none';
             if (dbUnsubscribe) dbUnsubscribe();
@@ -686,16 +697,12 @@
     }
 
     /* =========================================
-       3. ECHTZEIT-DATENBANK LOGIK (FIRESTORE)
+       3. ECHTZEIT-DATENBANK LOGIK & BACKUP
        ========================================= */
-    
-    // Beobachtet live alle Listen, die mir gehören ODER mit mir geteilt wurden
     function startDatabaseSync() {
         if (!currentUser) return;
+        if (dbUnsubscribe) dbUnsubscribe();
         
-        if (dbUnsubscribe) dbUnsubscribe(); // Alten Listener stoppen falls vorhanden
-        
-        // Firestore Abfrage: Wo bin ich im "accessibleBy" Array?
         dbUnsubscribe = db.collection('packlisten')
             .where('accessibleBy', 'array-contains', currentUser.email)
             .onSnapshot(snapshot => {
@@ -704,7 +711,6 @@
                     packlisten.push({ id: doc.id, ...doc.data() });
                 });
                 
-                // UI Aktualisieren
                 renderLists();
                 if (activeListId) {
                     const exists = packlisten.find(l => l.id === activeListId);
@@ -716,7 +722,67 @@
             });
     }
 
-    // Speichert eine NEUE Liste in die Cloud
+    /* --- BACKUP EXPORT / IMPORT LOGIK --- */
+    function exportBackup() {
+        if (!packlisten || packlisten.length === 0) {
+            alert("Keine Packlisten zum Exportieren vorhanden.");
+            return;
+        }
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(packlisten, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `packlisten_backup_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function importBackup(e) {
+        const file = e.target.files[0];
+        if (!file || !currentUser) return;
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const importedLists = JSON.parse(evt.target.result);
+                if (!Array.isArray(importedLists)) {
+                    alert("Ungültiges Backup-Format.");
+                    return;
+                }
+
+                const batch = db.batch();
+                let importedCount = 0;
+
+                importedLists.forEach(list => {
+                    const newDocId = list.id || ('list-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4));
+                    const docRef = db.collection('packlisten').doc(newDocId);
+                    
+                    const cleanList = {
+                        name: list.name || 'Importierte Liste',
+                        date: list.date || new Date().toISOString().slice(0, 10),
+                        purpose: list.purpose || '',
+                        notes: list.notes || '',
+                        owner: currentUser.email,
+                        accessibleBy: [currentUser.email],
+                        items: Array.isArray(list.items) ? list.items : []
+                    };
+                    
+                    batch.set(docRef, cleanList, { merge: true });
+                    importedCount++;
+                });
+
+                batch.commit().then(() => {
+                    alert(`${importedCount} Liste(n) erfolgreich aus dem Backup importiert!`);
+                    e.target.value = '';
+                }).catch(err => alert("Fehler beim Speichern in der Cloud: " + err.message));
+
+            } catch (err) {
+                alert("Fehler beim Lesen der Datei: " + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+
     document.getElementById('newListForm').addEventListener('submit', (e) => {
         e.preventDefault();
         if(!currentUser) return;
@@ -725,14 +791,13 @@
         const presetKey = document.getElementById('listPreset').value;
         const newId = 'list-' + Date.now();
         
-        // Neues Dokument erstellen
         const newList = {
             name: name,
             date: document.getElementById('listDate').value,
             purpose: document.getElementById('listPurpose').value.trim(),
             notes: '',
             owner: currentUser.email,
-            accessibleBy: [currentUser.email], // Array der Nutzer, die Zugriff haben
+            accessibleBy: [currentUser.email],
             items: (presetKey !== 'none' && PRESETS[presetKey]) ? JSON.parse(JSON.stringify(PRESETS[presetKey])) : []
         };
 
@@ -744,14 +809,12 @@
         });
     });
 
-    // Liste Freigeben (Teilen)
     function shareActiveList() {
         if (!activeListId || !currentUser) return;
         
         const list = packlisten.find(l => l.id === activeListId);
         if (!list) return;
 
-        // Nur der Eigentümer darf teilen (optional, aber sinnvoll)
         if (list.owner !== currentUser.email) {
             alert("Nur der Ersteller der Liste kann sie freigeben.");
             return;
@@ -760,7 +823,6 @@
         const emailToShare = prompt("Mit wem möchtest du die Liste teilen?\n(E-Mail Adresse des anderen Accounts eingeben):");
         
         if (emailToShare && emailToShare.trim() !== '') {
-            // Füge die E-Mail zum Array hinzu
             db.collection('packlisten').doc(activeListId).update({
                 accessibleBy: firebase.firestore.FieldValue.arrayUnion(emailToShare.trim().toLowerCase())
             }).then(() => {
@@ -769,7 +831,6 @@
         }
     }
 
-    // Item hinzufügen
     document.getElementById('addItemForm').addEventListener('submit', (e) => {
         e.preventDefault();
         if (!activeListId) return;
@@ -783,14 +844,12 @@
                 category: document.getElementById('newItemCategory').value,
                 packed: false
             };
-            // Cloud Update (Items Array wird überschrieben)
             const updatedItems = [...list.items, newItem];
             db.collection('packlisten').doc(activeListId).update({ items: updatedItems });
             nameInput.value = '';
         }
     });
 
-    // Haken setzen / entfernen
     function togglePacked(listId, itemId) {
         const list = packlisten.find(l => l.id === listId);
         if (list) {
@@ -802,7 +861,6 @@
         }
     }
 
-    // Item löschen
     function deleteItem(listId, itemId) {
         const list = packlisten.find(l => l.id === listId);
         if (list) {
@@ -811,7 +869,6 @@
         }
     }
 
-    // Liste komplett löschen
     function deleteList(id) {
         if (confirm('Packliste unwiderruflich aus der Cloud löschen?')) {
             db.collection('packlisten').doc(id).delete().then(() => {
@@ -824,7 +881,6 @@
         }
     }
 
-    // Notizen speichern (mit Debounce, damit wir Firestore nicht fluten)
     let noteTimeout;
     document.getElementById('activeNotes').addEventListener('input', (e) => {
         if (!activeListId) return;
@@ -832,12 +888,11 @@
         const val = e.target.value;
         noteTimeout = setTimeout(() => {
             db.collection('packlisten').doc(activeListId).update({ notes: val });
-        }, 1000); // Speichert 1 Sekunde nach der letzten Eingabe
+        }, 1000);
     });
 
-
     /* =========================================
-       4. UI & RENDERING (Wird von DB aufgerufen)
+       4. UI & RENDERING
        ========================================= */
     const activeListContent = document.getElementById('activeListContent');
     const noSelectionNotice = document.getElementById('noSelectionNotice');
@@ -856,14 +911,14 @@
 
         document.getElementById('activeTitle').textContent = list.name;
         document.getElementById('activeSubtitle').textContent = `${formatDate(list.date)} • ${list.purpose || 'Allgemein'}`;
-        // Nur updaten, wenn der User gerade nicht tippt
+        
         if(document.activeElement !== document.getElementById('activeNotes')) {
             document.getElementById('activeNotes').value = list.notes || '';
         }
 
         renderItems(list);
         if (autoSwitch) switchTab('active');
-        renderLists(); // um die aktive Liste farblich zu markieren
+        renderLists();
     }
 
     function showEmptyState() {
@@ -946,7 +1001,6 @@
             const div = document.createElement('div');
             div.className = `list-card-item ${list.id === activeListId ? 'active-list' : ''}`;
             
-            // Badge wenn geteilt
             let shareBadge = '';
             if(list.owner !== currentUser.email) shareBadge = '👥 Geteilt';
 
@@ -977,7 +1031,6 @@
             if (list) renderItems(list);
         }
     }
-
 
     /* =========================================
        5. DESIGN, THEMES & BASIS LOGIK
@@ -1015,7 +1068,6 @@
         if (isDarkMode) document.body.classList.add('dark-mode');
         else document.body.classList.remove('dark-mode');
         
-        // Element IDs checken bevor sie befüllt werden (Verhindert JS Errors)
         const darkTgl = document.getElementById('darkModeToggle');
         if(darkTgl) darkTgl.checked = isDarkMode;
 
@@ -1026,8 +1078,12 @@
         if(navSlider) navSlider.value = navOpacity;
         
         document.documentElement.style.setProperty('--primary', primaryColor);
-        document.documentElement.style.setProperty('--primary-glow', hexToRgba(primaryColor, 0.35));
+        document.documentElement.style.setProperty('--primary-glow', hexToRgba(primaryColor, 0.45));
+        
         setAppBackground(appBgColor, false);
+        
+        const colorPicker = document.getElementById('colorAppBg');
+        if(colorPicker) colorPicker.value = appBgColor;
 
         const canvTgl = document.getElementById('canvasToggle');
         if(canvTgl) canvTgl.checked = canvasEnabled;
@@ -1044,6 +1100,10 @@
         appBgColor = color;
         if (save) localStorage.setItem('app_bg_color', color);
         document.documentElement.style.setProperty('--app-bg', color);
+        const colorPicker = document.getElementById('colorAppBg');
+        if (colorPicker && colorPicker.value !== color) {
+            colorPicker.value = color;
+        }
     }
 
     function toggleCanvas() {
@@ -1094,7 +1154,7 @@
         return hex;
     }
 
-    /* --- FLUID CANVAS --- */
+    /* --- FLUID CANVAS (Intensivere Deckkraft für kräftige Farben) --- */
     function startFluidCanvas() {
         const canvas = document.getElementById('fluid-canvas');
         const ctx = canvas.getContext('2d');
@@ -1111,11 +1171,12 @@
         window.addEventListener('mousemove', (e) => { pointer.targetX = e.clientX; pointer.targetY = e.clientY; });
         window.addEventListener('touchmove', (e) => { if (e.touches.length > 0) { pointer.targetX = e.touches[0].clientX; pointer.targetY = e.touches[0].clientY; }});
 
+        // Alpha-Werte wurden für kräftigere Farben auf ~0.65 - 0.75 erhöht
         const blobs = [
-            { x: width * 0.2, y: height * 0.3, vx: 0.8, vy: 0.6, radius: 260, colorIdx: 0, alpha: 0.45 },
-            { x: width * 0.8, y: height * 0.7, vx: -0.6, vy: -0.5, radius: 300, colorIdx: 1, alpha: 0.45 },
-            { x: width * 0.5, y: height * 0.5, vx: 0.4, vy: -0.7, radius: 240, colorIdx: 2, alpha: 0.35 },
-            { x: 0, y: 0, vx: 0, vy: 0, radius: 220, isCursor: true, colorIdx: 3, alpha: 0.4 }
+            { x: width * 0.2, y: height * 0.3, vx: 0.8, vy: 0.6, radius: 280, colorIdx: 0, alpha: 0.75 },
+            { x: width * 0.8, y: height * 0.7, vx: -0.6, vy: -0.5, radius: 320, colorIdx: 1, alpha: 0.75 },
+            { x: width * 0.5, y: height * 0.5, vx: 0.4, vy: -0.7, radius: 260, colorIdx: 2, alpha: 0.65 },
+            { x: 0, y: 0, vx: 0, vy: 0, radius: 240, isCursor: true, colorIdx: 3, alpha: 0.7 }
         ];
 
         function animate() {
