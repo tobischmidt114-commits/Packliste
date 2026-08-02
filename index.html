@@ -317,11 +317,62 @@
         .color-picker::-webkit-color-swatch { border: 2px solid var(--glass-border); border-radius: 50%; }
 
         @media print {
-            #fluid-canvas, header, .bottom-nav-wrapper, .filter-bar, .add-item-box, .btn-print-hide { display: none !important; }
-            body { background: white !important; color: black !important; padding: 0 !important; }
-            .card { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
-            .custom-checkbox { border-color: #000 !important; }
+            /* Nicht benötigte Elemente ausblenden */
+            #fluid-canvas, header, .bottom-nav-wrapper, .filter-bar, .add-item-box, .btn-print-hide { 
+                display: none !important; 
+            }
+            
+            /* Basis für das Papier */
+            body { 
+                background: white !important; 
+                color: black !important; 
+                padding: 0 !important; 
+                overflow: visible !important;
+                height: auto !important;
+            }
+
+            /* Container anpassen */
+            .container {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* Karten ohne Glass-Effekt für den Drucker */
+            .card { 
+                background: transparent !important; 
+                border: none !important; 
+                box-shadow: none !important; 
+                padding: 10px 0 !important; 
+                margin-bottom: 15px !important;
+            }
+
+            /* WICHTIG: Farben für den Druck erzwingen, damit Text lesbar ist */
+            :root {
+                --text-main: #000000 !important;
+                --text-muted: #48484a !important;
+                --input-bg: transparent !important;
+                --item-border: #cccccc !important;
+            }
+
+            /* Checkboxen für den Druck anpassen */
+            .custom-checkbox { 
+                border-color: #000 !important; 
+                background-color: transparent !important;
+            }
+            
+            .custom-checkbox:checked {
+                background-color: #34c759 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            /* Verhindern, dass Elemente unglücklich umgebrochen werden */
+            .card, .item-row {
+                break-inside: avoid;
+            }
         }
+
         @media (max-width: 480px) {
             .nav-item span { display: none; }
             .nav-item { padding: 12px 14px; min-width: 48px; }
